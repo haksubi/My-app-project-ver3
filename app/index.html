@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d1426">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="인니어학습">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>🇮🇩 인도네시아어 학습 — KPFM</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────── */
+:root{
+  --bg:#0d1426;--bg2:#111a33;--surf:#1a2744;--card:#1f2f50;--card2:#243457;
+  --bdr:#2a3d6b;--bdr2:#354d84;
+  --gold:#f0c040;--gold2:#f7d978;--teal:#2ee8c0;--red:#ff5f72;--blue:#4a90e2;
+  --txt:#e8edf8;--txt2:#a8b5d4;--txt3:#6b7fa8;
+  --r:16px;--rs:10px;--sh:0 8px 32px rgba(0,0,0,.45);
+  --nb:64px;--sab:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans KR',sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,textarea,select{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+#app{width:100%;height:100%;display:flex;flex-direction:column;position:relative}
+.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;
+  padding-bottom:calc(var(--nb) + var(--sab) + 8px)}
+.screen.active{display:block}
+
+/* ── TOP BAR ─────────────────────────────────────── */
+.topbar{background:var(--surf);border-bottom:1px solid var(--bdr);
+  padding:12px 16px 10px;display:flex;align-items:center;gap:10px;
+  flex-shrink:0;position:sticky;top:0;z-index:20}
+.topbar-title{flex:1;font-size:18px;font-weight:700}
+.topbar-title span{color:var(--gold)}
+.topbar-sub{font-size:11px;color:var(--txt3);margin-top:1px}
+.topbar-badge{background:var(--gold);color:#111;font-size:11px;font-weight:900;
+  padding:3px 10px;border-radius:20px;white-space:nowrap}
+
+/* search button */
+.search-btn{background:var(--card);border:1px solid var(--bdr);color:var(--txt3);
+  padding:7px 12px;border-radius:var(--rs);font-size:13px;display:flex;align-items:center;gap:5px}
+
+/* ── SEARCH BAR ─────────────────────────────────── */
+.search-bar{background:var(--surf);border-bottom:1px solid var(--bdr);
+  padding:10px 16px;display:none;position:sticky;top:0;z-index:19}
+.search-bar.show{display:block}
+.search-input-wrap{display:flex;align-items:center;gap:8px;
+  background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--rs);
+  padding:8px 12px}
+.search-input-wrap input{flex:1;background:none;color:var(--txt);font-size:14px;border:none}
+.search-input-wrap input::placeholder{color:var(--txt3)}
+.search-clear{background:none;color:var(--txt3);font-size:16px;padding:0 2px}
+
+/* ── BOTTOM NAV ─────────────────────────────────── */
+.bottom-nav{height:var(--nb);background:var(--surf);border-top:1px solid var(--bdr);
+  display:flex;flex-shrink:0;padding-bottom:var(--sab)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;background:none;color:var(--txt3);font-size:10px;font-weight:500;
+  transition:color .2s;position:relative;padding:6px 0}
+.nav-btn.active{color:var(--gold)}
+.nav-btn .ico{font-size:21px;line-height:1}
+.nav-btn::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--gold);border-radius:0 0 3px 3px;transition:width .2s}
+.nav-btn.active::after{width:28px}
+.nav-badge{position:absolute;top:6px;right:calc(50% - 18px);
+  background:var(--red);color:#fff;font-size:9px;font-weight:900;
+  width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* ── HOME ───────────────────────────────────────── */
+.hero{background:linear-gradient(155deg,var(--surf),var(--bg2));
+  padding:18px 16px 20px;position:relative;overflow:hidden}
+.hero::before{content:'🇮🇩';position:absolute;right:-8px;top:-8px;font-size:90px;
+  opacity:.08;transform:rotate(-10deg);pointer-events:none}
+.hero-greet{font-size:12px;color:var(--teal);font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.hero-title{font-size:22px;font-weight:900;line-height:1.3;margin-bottom:14px}
+.hero-title em{color:var(--gold);font-style:normal}
+
+.ring-row{display:flex;gap:12px;align-items:center}
+.ring-wrap{position:relative;width:72px;height:72px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--bdr);stroke-width:6}
+.ring-fill{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;
+  transition:stroke-dashoffset .7s ease}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.ring-num{font-size:16px;font-weight:900;color:var(--gold);line-height:1}
+.ring-sub{font-size:9px;color:var(--txt3)}
+.ring-info{flex:1}
+.ring-info .ri-lbl{font-size:12px;color:var(--txt3);margin-bottom:3px}
+.ring-info .ri-val{font-size:20px;font-weight:900;margin-bottom:2px}
+.ring-info .ri-sub{font-size:11px;color:var(--txt2)}
+
+/* streak + motivational */
+.streak-card{margin:14px 16px 0;background:linear-gradient(135deg,rgba(240,192,64,.12),rgba(46,232,192,.08));
+  border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;
+  display:flex;align-items:center;gap:12px}
+.streak-icon{font-size:28px}
+.streak-body{flex:1}
+.streak-num{font-size:20px;font-weight:900;color:var(--gold)}
+.streak-desc{font-size:11px;color:var(--txt2);margin-top:1px}
+
+/* section */
+.sec{padding:14px 16px 0}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.sec-title .dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.sec-more{font-size:11px;color:var(--teal);background:none;
+  border:1px solid var(--bdr);border-radius:20px;padding:4px 10px}
+
+/* today preview scroll */
+.preview-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.preview-scroll::-webkit-scrollbar{display:none}
+.prev-card{flex-shrink:0;width:185px;background:var(--card);border:1px solid var(--bdr);
+  border-radius:var(--r);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .15s}
+.prev-card:active{transform:scale(.97)}
+.prev-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.prev-card.c-basic::before{background:var(--teal)}
+.prev-card.c-safety::before{background:var(--red)}
+.prev-card.c-daily::before{background:var(--gold)}
+.prev-card.c-supplement::before{background:#a78bfa}
+.prev-card.c-custom::before{background:var(--blue)}
+.prev-card .pc-cat{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.c-basic .pc-cat{color:var(--teal)}.c-safety .pc-cat{color:var(--red)}
+.c-daily .pc-cat{color:var(--gold)}.c-custom .pc-cat{color:var(--blue)}
+.prev-card .pc-indo{font-size:17px;font-weight:900;margin-bottom:3px;line-height:1.2}
+.prev-card .pc-read{font-size:11px;color:var(--txt3);margin-bottom:5px}
+.prev-card .pc-kr{font-size:12px;color:var(--txt2)}
+.prev-card .pc-chk{position:absolute;top:10px;right:10px;font-size:14px}
+
+/* cat chips */
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:7px 12px;border-radius:30px;background:var(--card);border:1px solid var(--bdr);
+  font-size:12px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;gap:5px}
+.chip:active{transform:scale(.96)}
+.chip .cnt{background:var(--bdr2);color:var(--txt3);font-size:9px;padding:1px 5px;border-radius:8px}
+.chip.ab{background:rgba(46,232,192,.12);border-color:var(--teal);color:var(--teal)}
+.chip.as{background:rgba(255,95,114,.12);border-color:var(--red);color:var(--red)}
+.chip.ad{background:rgba(240,192,64,.12);border-color:var(--gold);color:var(--gold)}
+.chip.ac{background:rgba(74,144,226,.12);border-color:var(--blue);color:var(--blue)}
+
+/* ── TODAY 10 ───────────────────────────────────── */
+.today-hdr{background:linear-gradient(155deg,var(--surf),var(--bg2));
+  padding:14px 16px 14px;border-bottom:1px solid var(--bdr)}
+.today-title{font-size:19px;font-weight:900;margin-bottom:3px}
+.today-title em{color:var(--gold);font-style:normal}
+.today-sub{font-size:11px;color:var(--txt3)}
+.prog-bar{height:4px;background:var(--bdr);border-radius:2px;margin-top:10px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));
+  border-radius:2px;transition:width .5s ease}
+
+.done-banner{margin:14px 16px;background:linear-gradient(135deg,rgba(46,232,192,.12),rgba(240,192,64,.1));
+  border:1px solid var(--teal);border-radius:var(--r);padding:16px;text-align:center;display:none}
+.done-banner.show{display:block}
+.done-banner .db-ico{font-size:38px;margin-bottom:7px}
+.done-banner .db-title{font-size:17px;font-weight:900;color:var(--teal)}
+.done-banner .db-sub{font-size:12px;color:var(--txt2);margin-top:3px}
+.done-banner .db-btn{margin-top:10px;background:var(--teal);color:#111;
+  font-weight:900;font-size:13px;padding:8px 20px;border-radius:var(--rs);width:100%}
+
+.tl-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.tl-item{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;
+  transition:border-color .15s}
+.tl-item:active{opacity:.8}
+.tl-item.done{opacity:.52}
+.tl-item.done .tl-num{background:var(--teal);border-color:var(--teal);color:#111}
+.tl-num{width:26px;height:26px;border-radius:50%;background:var(--card2);
+  border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--txt3);flex-shrink:0}
+.tl-body{flex:1}
+.tl-indo{font-size:17px;font-weight:700;margin-bottom:2px}
+.tl-read{font-size:11px;color:var(--txt3);margin-bottom:4px}
+.tl-kr{font-size:13px;color:var(--txt2)}
+.tl-sit{font-size:11px;color:var(--gold);background:rgba(240,192,64,.1);
+  border-radius:6px;padding:3px 7px;margin-top:6px;display:inline-block}
+.tl-chk{font-size:18px;flex-shrink:0;align-self:center}
+
+/* ── LESSON LIST ────────────────────────────────── */
+.filter-row{background:var(--surf);border-bottom:1px solid var(--bdr);
+  padding:10px 16px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;
+  position:sticky;top:0;z-index:18}
+.filter-row::-webkit-scrollbar{display:none}
+.fpill{flex-shrink:0;padding:6px 13px;border-radius:20px;background:var(--card);
+  border:1px solid var(--bdr);color:var(--txt3);font-size:12px;font-weight:500;transition:all .15s}
+.fpill.on{background:var(--gold);border-color:var(--gold);color:#111;font-weight:700}
+
+.llist{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.lcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;transition:border-color .15s;position:relative}
+.lcard:active{opacity:.85}
+.lcard-bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.bar-basic{background:var(--teal)}.bar-safety{background:var(--red)}
+.bar-daily{background:var(--gold)}.bar-custom{background:var(--blue)}
+.bar-supplement{background:#a78bfa}
+.lcard-inner{padding:12px 14px 10px 18px}
+.lcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.lc-indo{font-size:19px;font-weight:900;flex:1;line-height:1.2}
+.lc-badge{font-size:9px;font-weight:700;letter-spacing:.4px;padding:2px 7px;
+  border-radius:8px;flex-shrink:0;text-transform:uppercase;margin-top:3px}
+.bb{background:rgba(46,232,192,.18);color:var(--teal)}
+.bs{background:rgba(255,95,114,.18);color:var(--red)}
+.bd{background:rgba(240,192,64,.18);color:var(--gold)}
+.bc{background:rgba(74,144,226,.18);color:var(--blue)}
+.bsp{background:rgba(167,139,250,.18);color:#a78bfa}
+.lc-read{font-size:11px;color:var(--txt3);margin-top:2px}
+.lc-kr{font-size:13px;color:var(--txt2);margin-top:4px}
+.lc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.lc-exbtn{font-size:11px;color:var(--teal);background:none;
+  display:flex;align-items:center;gap:3px}
+.lc-memo{font-size:10px;color:var(--txt3);background:var(--card2);
+  padding:2px 7px;border-radius:7px}
+.lc-ex{display:none;padding:8px 10px;background:var(--card2);border-radius:8px;
+  margin-top:6px;line-height:1.65}
+.lc-ex.open{display:block}
+.lc-ex .ex-tag{font-size:9px;font-weight:700;color:var(--gold);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.lc-ex .ex-indo{font-size:13px;color:var(--txt);font-weight:500}
+.lc-ex .ex-read{font-size:10px;color:var(--txt3)}
+.lc-ex .ex-kr{font-size:12px;color:var(--txt2);margin-top:2px}
+.lc-ex .ex-sep{height:1px;background:var(--bdr);margin:7px 0}
+
+/* ── ADD SCREEN ─────────────────────────────────── */
+.add-wrap{padding:14px 16px}
+.add-title{font-size:18px;font-weight:900;margin-bottom:3px}
+.add-sub{font-size:12px;color:var(--txt3);margin-bottom:16px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.flabel{font-size:11px;font-weight:700;color:var(--txt2);
+  text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px}
+.flabel .req{color:var(--red)}
+.finput,.ftextarea,.fselect{background:var(--card);border:1.5px solid var(--bdr);
+  border-radius:var(--rs);padding:11px 13px;color:var(--txt);font-size:14px;
+  transition:border-color .2s;width:100%}
+.finput:focus,.ftextarea:focus{border-color:var(--gold)}
+.ftextarea{resize:none;height:72px;line-height:1.5}
+.fhint{font-size:10px;color:var(--txt3)}
+.add-btn{background:linear-gradient(135deg,var(--gold),#e8a020);color:#111;
+  font-size:15px;font-weight:900;padding:14px;border-radius:var(--r);
+  transition:transform .15s;width:100%;margin-bottom:20px}
+.add-btn:active{transform:scale(.97)}
+
+.mw-hdr{padding:10px 16px;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;justify-content:space-between}
+.mw-hdr-title{font-size:13px;font-weight:700}
+.mw-hdr-cnt{font-size:11px;color:var(--txt3)}
+.mw-item{display:flex;align-items:center;padding:11px 16px;
+  border-bottom:1px solid var(--bdr);gap:10px;cursor:pointer}
+.mw-body{flex:1}
+.mw-indo{font-size:14px;font-weight:700}
+.mw-sub{font-size:11px;color:var(--txt2);margin-top:2px}
+.mw-del{background:rgba(255,95,114,.12);border:1px solid rgba(255,95,114,.25);
+  color:var(--red);font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px}
+.empty{padding:36px 20px;text-align:center;color:var(--txt3)}
+.empty .eico{font-size:44px;margin-bottom:10px}
+.empty .etxt{font-size:13px;line-height:1.6}
+
+/* ── MODAL SHEET ─────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(5px);
+  align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{background:var(--surf);border-radius:22px 22px 0 0;border-top:1px solid var(--bdr);
+  padding:0 0 calc(20px + var(--sab));width:100%;max-width:560px;
+  animation:su .25s ease;max-height:88vh;overflow-y:auto}
+@keyframes su{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.sh-handle{width:38px;height:4px;background:var(--bdr2);border-radius:2px;margin:11px auto}
+.sh-body{padding:0 18px 10px}
+.sh-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.sh-indo{font-size:28px;font-weight:900;line-height:1.2;margin-bottom:5px}
+.sh-read{font-size:15px;color:var(--gold);font-weight:500;margin-bottom:3px}
+.sh-kr{font-size:16px;color:var(--txt2);margin-bottom:14px}
+.sh-div{height:1px;background:var(--bdr);margin:12px 0}
+.sh-sec{font-size:10px;font-weight:700;color:var(--txt3);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:9px}
+.sit-item{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);
+  padding:11px 13px;margin-bottom:8px}
+.sit-tag{font-size:9px;font-weight:700;color:var(--teal);
+  background:rgba(46,232,192,.1);padding:2px 7px;border-radius:5px;
+  display:inline-block;margin-bottom:5px}
+.sit-indo{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:2px}
+.sit-read{font-size:11px;color:var(--txt3);margin-bottom:2px}
+.sit-kr{font-size:12px;color:var(--txt2)}
+.sh-close{width:100%;margin-top:14px;background:var(--card);color:var(--txt);
+  border:1px solid var(--bdr);border-radius:var(--r);padding:12px;
+  font-size:14px;font-weight:700}
+.sh-done-btn{width:100%;margin-top:8px;background:rgba(46,232,192,.15);color:var(--teal);
+  border:1px solid var(--teal);border-radius:var(--r);padding:12px;
+  font-size:14px;font-weight:700}
+.sh-bookmark{position:absolute;top:14px;right:16px;background:none;
+  font-size:22px;color:var(--txt3)}
+.sh-bookmark.on{color:var(--gold)}
+
+/* ── TOAST ───────────────────────────────────────── */
+#toast{position:fixed;top:76px;left:50%;transform:translateX(-50%);
+  background:var(--txt);color:#111;padding:9px 20px;border-radius:28px;
+  font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+  transition:opacity .25s;z-index:200;white-space:nowrap;box-shadow:var(--sh)}
+#toast.show{opacity:1}
+
+/* ── INSTALL BANNER ──────────────────────────────── */
+#install-banner{display:none;position:fixed;bottom:calc(var(--nb) + var(--sab));
+  left:0;right:0;padding:12px 16px;background:var(--surf);
+  border-top:1px solid var(--bdr);z-index:30;
+  flex-direction:column;gap:8px}
+#install-banner.show{display:flex}
+.ib-title{font-size:13px;font-weight:700;color:var(--txt)}
+.ib-sub{font-size:11px;color:var(--txt3)}
+.ib-btns{display:flex;gap:8px}
+.ib-install{background:var(--gold);color:#111;font-weight:900;font-size:13px;
+  padding:8px 16px;border-radius:var(--rs);flex:1}
+.ib-dismiss{background:var(--card);color:var(--txt3);font-size:13px;
+  padding:8px 14px;border-radius:var(--rs);border:1px solid var(--bdr)}
+
+/* ── TTS SPEAK BUTTON ─────────────────────────── */
+.speak-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(46,232,192,.12);border:1.5px solid rgba(46,232,192,.35);
+  color:var(--teal);border-radius:30px;
+  padding:4px 11px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;gap:5px;
+  white-space:nowrap;flex-shrink:0;
+}
+.speak-btn:active{transform:scale(.93);background:rgba(46,232,192,.25)}
+.speak-btn.speaking{background:rgba(46,232,192,.25);border-color:var(--teal);
+  animation:pulse-teal .7s ease infinite alternate}
+.speak-btn.loading{opacity:.6;cursor:not-allowed}
+@keyframes pulse-teal{from{box-shadow:0 0 0 0 rgba(46,232,192,.4)}to{box-shadow:0 0 0 6px rgba(46,232,192,0)}}
+
+.speak-sm{
+  display:inline-flex;align-items:center;
+  background:none;border:1px solid rgba(46,232,192,.3);
+  color:var(--teal);border-radius:20px;
+  padding:2px 8px;font-size:11px;cursor:pointer;
+  transition:all .15s;gap:3px;flex-shrink:0;
+}
+.speak-sm:active{background:rgba(46,232,192,.15)}
+.speak-sm.speaking{color:var(--teal);border-color:var(--teal);
+  animation:pulse-teal .7s ease infinite alternate}
+
+/* modal speak row */
+.sh-speak-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sh-speak-row .sh-indo{margin-bottom:0;flex:1}
+
+/* today list speak */
+.tl-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+
+/* lesson card speak */
+.lc-speak-row{display:flex;align-items:center;gap:6px;margin-top:3px}
+
+/* sit speak row */
+.sit-speak-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px}
+
+/* speed control */
+.tts-control{display:flex;align-items:center;gap:6px;margin-top:10px;
+  padding:8px 12px;background:var(--card2);border-radius:var(--rs)}
+.tts-control label{font-size:11px;color:var(--txt3);flex-shrink:0}
+.tts-speed{flex:1;accent-color:var(--teal)}
+.tts-speed-val{font-size:11px;color:var(--teal);font-weight:700;min-width:28px;text-align:right}
+.tts-no-support{font-size:11px;color:var(--red);padding:6px 0;text-align:center}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar" id="topbar">
+    <div style="flex:1">
+      <div class="topbar-title">🇮🇩 <span>인니어</span> 학습</div>
+      <div class="topbar-sub">KPFM 안전관리자 전용</div>
+    </div>
+    <button class="search-btn" onclick="toggleSearch()" id="search-toggle-btn">🔍</button>
+    <div class="topbar-badge" id="top-badge">오늘 0/10</div>
+  </div>
+
+  <!-- SEARCH BAR -->
+  <div class="search-bar" id="search-bar">
+    <div class="search-input-wrap">
+      <span>🔍</span>
+      <input type="text" placeholder="인도네시아어·한국어 검색…" id="search-input" oninput="onSearch(this.value)">
+      <button class="search-clear" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- ══════════ SCREEN: HOME ══════════ -->
+  <div class="screen active" id="sc-home">
+    <div class="hero">
+      <div class="hero-greet" id="greet-txt">좋은 아침입니다! 🌅</div>
+      <div class="hero-title">오늘도 한 걸음,<br><em>인도네시아어</em> 정복!</div>
+      <div class="ring-row">
+        <div class="ring-wrap">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle class="ring-track" cx="36" cy="36" r="30"/>
+            <circle class="ring-fill" cx="36" cy="36" r="30" id="ring-fill"
+              stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-num" id="ring-num">0</div>
+            <div class="ring-sub">/ 10</div>
+          </div>
+        </div>
+        <div class="ring-info">
+          <div class="ri-lbl">오늘 학습 진도</div>
+          <div class="ri-val" id="ring-val">시작해 볼까요?</div>
+          <div class="ri-sub" id="ring-sub">오늘의 10문장이 기다려요</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="streak-card">
+      <div class="streak-icon">🔥</div>
+      <div class="streak-body">
+        <div class="streak-num"><span id="streak-num">0</span>일 연속 학습</div>
+        <div class="streak-desc" id="streak-desc">지금 오늘 학습을 시작해 보세요!</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-hdr">
+        <div class="sec-title"><div class="dot"></div>오늘의 학습 미리보기</div>
+        <button class="sec-more" onclick="goTab('today')">전체 보기</button>
+      </div>
+      <div class="preview-scroll" id="preview-scroll"></div>
+    </div>
+
+    <div class="sec" style="padding-bottom:16px">
+      <div class="sec-hdr">
+        <div class="sec-title"><div class="dot"></div>카테고리별 학습</div>
+      </div>
+      <div class="chips">
+        <button class="chip" onclick="goTabFilter('basic')">📗 기초회화 <span class="cnt" id="cnt-basic">0</span></button>
+        <button class="chip" onclick="goTabFilter('safety')">🦺 안전수칙 <span class="cnt" id="cnt-safety">0</span></button>
+        <button class="chip" onclick="goTabFilter('daily')">🌴 일상생활 <span class="cnt" id="cnt-daily">0</span></button>
+        <button class="chip" onclick="goTabFilter('supplement')">📖 보충자료 <span class="cnt" id="cnt-supplement">0</span></button>
+        <button class="chip" onclick="goTabFilter('custom')">✏️ 내가 추가 <span class="cnt" id="cnt-custom">0</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ SCREEN: TODAY ══════════ -->
+  <div class="screen" id="sc-today">
+    <div class="today-hdr">
+      <div class="today-title">📅 오늘의 <em>10문장</em></div>
+      <div class="today-sub" id="today-date"></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="done-banner" id="done-banner">
+      <div class="db-ico">🎉</div>
+      <div class="db-title">오늘 학습 완료!</div>
+      <div class="db-sub">대단해요, Luar biasa! 🌴<br>내일도 10문장이 기다려요.</div>
+      <button class="db-btn" onclick="goTab('lesson')">📚 전체 학습 이어하기</button>
+    </div>
+    <div class="tl-list" id="tl-list"></div>
+  </div>
+
+  <!-- ══════════ SCREEN: LESSON ══════════ -->
+  <div class="screen" id="sc-lesson">
+    <div class="filter-row" id="filter-row">
+      <button class="fpill on" data-f="all"    onclick="setFilter('all',this)">전체</button>
+      <button class="fpill"    data-f="basic"  onclick="setFilter('basic',this)">📗 기초회화</button>
+      <button class="fpill"    data-f="safety" onclick="setFilter('safety',this)">🦺 안전수칙</button>
+      <button class="fpill"    data-f="daily"  onclick="setFilter('daily',this)">🌴 일상생활</button>
+      <button class="fpill"    data-f="supplement" onclick="setFilter('supplement',this)">📖 보충자료</button>
+      <button class="fpill"    data-f="custom" onclick="setFilter('custom',this)">✏️ 내가 추가</button>
+      <button class="fpill"    data-f="bm"     onclick="setFilter('bm',this)">⭐ 즐겨찾기</button>
+    </div>
+    <div class="llist" id="llist"></div>
+  </div>
+
+  <!-- ══════════ SCREEN: ADD ══════════ -->
+  <div class="screen" id="sc-add">
+    <div class="add-wrap">
+      <div class="add-title">✏️ 단어·문장 추가</div>
+      <div class="add-sub">직접 단어나 표현을 추가하고 오늘의 학습에 포함시켜요</div>
+
+      <div class="fg">
+        <label class="flabel">인도네시아어 <span class="req">*</span></label>
+        <input class="finput" id="ai" placeholder="예: Selamat pagi" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label class="flabel">발음 (읽기)</label>
+        <input class="finput" id="ar" placeholder="예: 슬라맛 빠기" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label class="flabel">한국어 뜻 <span class="req">*</span></label>
+        <input class="finput" id="ak" placeholder="예: 좋은 아침입니다" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label class="flabel">상황</label>
+        <input class="finput" id="as" placeholder="예: 출근 시 동료에게" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label class="flabel">예문 (인도네시아어)</label>
+        <textarea class="ftextarea" id="aei" placeholder="예: Selamat pagi, Pak Andi!"></textarea>
+      </div>
+      <div class="fg">
+        <label class="flabel">예문 (한국어)</label>
+        <textarea class="ftextarea" id="aek" placeholder="예: 안디 씨, 좋은 아침이에요!"></textarea>
+      </div>
+      <div class="fg">
+        <label class="flabel">메모</label>
+        <input class="finput" id="am" placeholder="예: 공식적 자리에서 사용" autocomplete="off">
+        <div class="fhint">💡 기억하고 싶은 팁이나 주의사항을 적어두세요</div>
+      </div>
+      <button class="add-btn" onclick="doAdd()">+ 추가하기</button>
+    </div>
+
+    <div class="mw-hdr">
+      <div class="mw-hdr-title">내가 추가한 단어</div>
+      <div class="mw-hdr-cnt" id="mw-cnt">0개</div>
+    </div>
+    <div id="mw-list"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nb-home"   onclick="goTab('home')">  <span class="ico">🏠</span>홈</button>
+    <button class="nav-btn"        id="nb-today"  onclick="goTab('today')"> <span class="ico">📅</span>오늘학습</button>
+    <button class="nav-btn"        id="nb-lesson" onclick="goTab('lesson')"><span class="ico">📚</span>전체</button>
+    <button class="nav-btn"        id="nb-add"    onclick="goTab('add')">   <span class="ico">✏️</span>추가</button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="onOverlayClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-body" style="position:relative">
+      <button class="sh-bookmark" id="sh-bm-btn" onclick="toggleBM()">☆</button>
+      <div class="sh-cat" id="sh-cat"></div>
+      <div class="sh-speak-row">
+        <div class="sh-indo" id="sh-indo"></div>
+        <button class="speak-btn" id="sh-speak-main" onclick="speakText('',true)">🔊 듣기</button>
+      </div>
+      <div class="sh-read" id="sh-read"></div>
+      <div class="sh-kr"   id="sh-kr"></div>
+      <div class="sh-div"></div>
+      <div class="sh-sec">📖 상황별 예문</div>
+      <div id="sh-sits"></div>
+      <div id="sh-memo-wrap" style="display:none">
+        <div class="sh-div"></div>
+        <div class="sh-sec">📝 메모</div>
+        <div id="sh-memo" style="font-size:13px;color:var(--txt2);padding:6px 0"></div>
+      </div>
+      <div class="tts-control" id="tts-control">
+        <label>🐢 속도</label>
+        <input type="range" class="tts-speed" id="tts-speed" min="0.5" max="1.5" step="0.1" value="0.9" oninput="updateSpeed(this.value)">
+        <span class="tts-speed-val" id="tts-speed-val">0.9x</span>
+      </div>
+      <button class="sh-done-btn" id="sh-done-btn" onclick="markDoneFromModal()">✅ 학습 완료 체크</button>
+      <button class="sh-close" onclick="closeOverlay()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <div>
+    <div class="ib-title">📱 홈 화면에 앱으로 설치하기</div>
+    <div class="ib-sub">오프라인에서도 학습 가능 · 앱처럼 바로 실행</div>
+  </div>
+  <div class="ib-btns">
+    <button class="ib-install" id="ib-install-btn">설치하기</button>
+    <button class="ib-dismiss" onclick="dismissInstall()">나중에</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   WORD DATABASE — 3개 교재 통합
+══════════════════════════════════════════════════ */
+const BUILT = [
+  // ── 기초회화 ──────────────────────────────────
+  {id:'b01',cat:'basic',indo:'Selamat pagi',read:'슬라맛 빠기',kr:'좋은 아침입니다',memo:'오전 10시까지 사용',
+   sits:[{tag:'출근 인사',indo:'Selamat pagi, Pak Budi!',read:'슬라맛 빠기, 빡 부디!',kr:'좋은 아침이에요, 부디 씨!'},
+         {tag:'상사에게',indo:'Selamat pagi, Bapak. Apa kabar?',read:'슬라맛 빠기, 바빡. 아빠 까바르?',kr:'좋은 아침입니다. 어떠세요?'}]},
+  {id:'b02',cat:'basic',indo:'Apa kabar?',read:'아빠 까바르?',kr:'잘 지내세요?',memo:'대답: Kabar baik = 잘 지냅니다',
+   sits:[{tag:'동료에게',indo:'Halo! Apa kabar hari ini?',read:'할로! 아빠 까바르 하리 이니?',kr:'안녕! 오늘 어떠세요?'},
+         {tag:'오랜만에',indo:'Wah, lama tidak bertemu! Apa kabar?',read:'와, 라마 띠닥 브르뜨무! 아빠 까바르?',kr:'오랜만이에요! 잘 지냈어요?'}]},
+  {id:'b03',cat:'basic',indo:'Terima kasih banyak',read:'뜨리마 까시 바냑',kr:'정말 감사합니다',memo:'Makasih(마까시) = 캐주얼',
+   sits:[{tag:'도움 받은 후',indo:'Terima kasih banyak atas bantuannya.',read:'뜨리마 까시 바냑 아따스 반뚜안냐.',kr:'도와주셔서 정말 감사합니다.'},
+         {tag:'대답',indo:'Sama-sama! Tidak masalah.',read:'사마사마! 띠닥 마살라.',kr:'천만에요! 괜찮아요.'}]},
+  {id:'b04',cat:'basic',indo:'Maaf, bisa ulangi pelan-pelan?',read:'마압, 비사 울랑이 쁠란쁠란?',kr:'죄송해요, 천천히 다시 말씀해 주시겠어요?',memo:'pelan-pelan = 천천히',
+   sits:[{tag:'업무 중',indo:'Saya belum mengerti. Maaf, bisa ulangi?',read:'사야 블룸 믕으르띠. 마압, 비사 울랑이?',kr:'아직 이해가 안 돼요. 다시 말씀해 주실래요?'},
+         {tag:'전화 통화',indo:'Maaf, suaranya kurang jelas. Bisa bicara lebih pelan?',read:'마압, 수아라냐 꾸랑 즐라스. 비사 비짜라 르비 쁠란?',kr:'죄송해요, 소리가 잘 안 들려요. 좀 더 천천히 말씀해 주실 수 있어요?'}]},
+  {id:'b05',cat:'basic',indo:'Perkenalkan, saya dari Korea',read:'뻐르끄날깐, 사야 다리 꼬레아',kr:'소개합니다, 저는 한국에서 왔어요',memo:'Senang bertemu = 만나서 반갑습니다',
+   sits:[{tag:'첫 출근',indo:'Perkenalkan, nama saya Haksub, dari Korea. Safety Officer.',read:'뻐르끄날깐, 나마 사야 학섭, 다리 꼬레아. 세이프티 오피서.',kr:'소개합니다, 저는 한국에서 온 학섭입니다. 안전관리자예요.'},
+         {tag:'이웃에게',indo:'Halo! Saya baru pindah ke sini. Saya orang Korea.',read:'할로! 사야 바루 삔다 끄 시니. 사야 오랑 꼬레아.',kr:'안녕하세요! 저 여기 막 이사왔어요. 한국 사람이에요.'}]},
+  {id:'b06',cat:'basic',indo:'Tolong bantu saya',read:'똘롱 반뚜 사야',kr:'저 좀 도와주세요',memo:'tolong = 부탁합니다 (핵심 단어)',
+   sits:[{tag:'길 잃었을 때',indo:'Permisi, tolong bantu saya. Saya tersesat.',read:'쁘르미시, 똘롱 반뚜 사야. 사야 뜨르세삿.',kr:'실례합니다, 도와주세요. 길을 잃었어요.'},
+         {tag:'업무 요청',indo:'Bisakah kamu bantu saya dengan laporan ini?',read:'비사까 까무 반뚜 사야 등안 라뽀란 이니?',kr:'이 보고서 좀 도와줄 수 있어요?'}]},
+  {id:'b07',cat:'basic',indo:'Ada masalah apa?',read:'아다 마살라 아빠?',kr:'무슨 문제가 있어요?',memo:'masalah = 문제 / solusi = 해결책',
+   sits:[{tag:'점검 후',indo:'Ada masalah dengan mesin ini. Perlu diperbaiki.',read:'아다 마살라 등안 메신 이니. 뻐를루 디빠르바이끼.',kr:'이 기계에 문제가 있어요. 수리가 필요해요.'},
+         {tag:'업무 확인',indo:'Tidak ada masalah. Semua berjalan lancar.',read:'띠닥 아다 마살라. 스무아 브르잘란 란짜르.',kr:'문제없어요. 모든 게 순조롭게 진행 중이에요.'}]},
+  {id:'b08',cat:'basic',indo:'Laporan sudah selesai',read:'라뽀란 수다 슬레사이',kr:'보고서 완성됐습니다',memo:'sudah=이미 / belum=아직 안',
+   sits:[{tag:'상사 보고',indo:'Pak, laporan inspeksi sudah selesai. Ini filenya.',read:'빡, 라뽀란 인스뻭시 수다 슬레사이. 이니 필레냐.',kr:'부장님, 점검 보고서 완성됐습니다. 파일이에요.'},
+         {tag:'미완료',indo:'Belum selesai. Butuh satu jam lagi.',read:'블룸 슬레사이. 부뚜 사뚜 잠 라기.',kr:'아직 안 됐어요. 한 시간 더 필요해요.'}]},
+  {id:'b09',cat:'basic',indo:'Rapat mulai jam berapa?',read:'라빳 물라이 잠 브라빠?',kr:'회의는 몇 시에 시작해요?',memo:'jam berapa = 몇 시',
+   sits:[{tag:'동료 확인',indo:'Rapat hari ini jam berapa? Di ruang mana?',read:'라빳 하리 이니 잠 브라빠? 디 루앙 마나?',kr:'오늘 회의 몇 시예요? 어느 방이에요?'},
+         {tag:'일정 변경',indo:'Rapat besok dipindah ke jam 3 sore.',read:'라빳 베속 디삔다 끄 잠 3 소레.',kr:'내일 회의는 오후 3시로 바뀌었어요.'}]},
+  {id:'b10',cat:'basic',indo:'Sampai jumpa besok!',read:'삼빠이 점빠 베속!',kr:'내일 봐요!',memo:'sampai = ~까지 / jumpa = 만나다',
+   sits:[{tag:'퇴근 인사',indo:'Sudah jam 5. Sampai jumpa besok, semuanya!',read:'수다 잠 5. 삼빠이 점빠 베속, 스무아냐!',kr:'벌써 5시네요. 내일 봐요, 모두!'},
+         {tag:'주말 전',indo:'Selamat menikmati akhir pekan! Sampai jumpa Senin.',read:'슬라맛 므니크마띠 아키르 뻬깐! 삼빠이 점빠 스닌.',kr:'즐거운 주말 보내세요! 월요일에 봐요.'}]},
+
+  // ── 안전수칙 ──────────────────────────────────
+  {id:'s01',cat:'safety',indo:'Wajib pakai APD lengkap!',read:'와집 빠까이 APD 릉깝!',kr:'APD 완전 착용 의무!',memo:'APD = Alat Pelindung Diri (개인보호장구)',
+   sits:[{tag:'구역 진입 전',indo:'Sebelum masuk area ini, wajib pakai APD lengkap!',read:'스블룸 마숙 아레아 이니, 와집 빠까이 APD 릉깝!',kr:'이 구역 진입 전, APD 완전 착용 의무!'},
+         {tag:'작업자 지적',indo:'Pak! Helm dan kacamatanya mana? Wajib dipakai!',read:'빡! 헬름 단 까짜마따냐 마나? 와집 디빠까이!',kr:'저기요! 헬멧이랑 보안경은요? 반드시 착용해야 해요!'}]},
+  {id:'s02',cat:'safety',indo:'Bahaya! Jangan lewat sini!',read:'바하야! 장안 르왓 시니!',kr:'위험! 여기 지나가지 마세요!',memo:'bahaya = 위험 (가장 중요한 단어!)',
+   sits:[{tag:'긴급 차단',indo:'Bahaya! Ada kebocoran gas! Jangan masuk!',read:'바하야! 아다 끄보꼬란 가스! 장안 마숙!',kr:'위험! 가스 누출이 있어요! 들어가지 마세요!'},
+         {tag:'경고판',indo:'Hati-hati! Area berbahaya. Dilarang masuk tanpa APD.',read:'하띠하띠! 아레아 브르바하야. 딜라랑 마숙 딴빠 APD.',kr:'조심해요! 위험 구역. APD 없이 출입 금지.'}]},
+  {id:'s03',cat:'safety',indo:'Lakukan JSA sebelum mulai kerja',read:'라꾸깐 JSA 스블룸 물라이 끄르자',kr:'작업 전 JSA를 실시하세요',memo:'JSA = Job Safety Analysis (작업안전분석)',
+   sits:[{tag:'작업 시작 전',indo:'Semua tim kumpul dulu. Kita lakukan JSA bersama.',read:'스무아 띰 꿈뿔 둘루. 끼따 라꾸깐 JSA 브르사마.',kr:'팀 모두 모여요. 같이 JSA 합시다.'},
+         {tag:'결과 기록',indo:'Hasil JSA wajib didokumentasikan dan ditandatangani.',read:'하실 JSA 와집 디도꾸멘따시깐 단 디딴다딴가니.',kr:'JSA 결과는 반드시 문서화하고 서명해야 합니다.'}]},
+  {id:'s04',cat:'safety',indo:'Izin kerja sudah ditandatangani?',read:'이진 끄르자 수다 디딴다딴가니?',kr:'작업허가서에 서명됐나요?',memo:'tanpa izin = 허가 없이 / sah = 유효한',
+   sits:[{tag:'작업 전 확인',indo:'Sebelum mulai, izin kerjanya sudah ada?',read:'스블룸 물라이, 이진 끄르자냐 수다 아다?',kr:'시작하기 전에, 작업허가서 있어요?'},
+         {tag:'허가 독촉',indo:'Tanpa izin kerja yang sah, dilarang bekerja!',read:'딴빠 이진 끄르자 양 사, 딜라랑 브끄르자!',kr:'유효한 작업허가서 없이 작업하면 안 됩니다!'}]},
+  {id:'s05',cat:'safety',indo:'Segera laporkan kecelakaan!',read:'스그라 라뽀르깐 끄쩰라까안!',kr:'사고를 즉시 보고하세요!',memo:'segera = 즉시 / kecelakaan = 사고',
+   sits:[{tag:'사고 발생',indo:'Ada kecelakaan! Segera hubungi tim P3K dan atasan!',read:'아다 끄쩰라까안! 스그라 후붕이 띰 P3K 단 아따산!',kr:'사고 발생! 즉시 응급팀과 상사에게 연락하세요!'},
+         {tag:'경미한 사고',indo:'Meskipun kecil, semua insiden harus dilaporkan segera.',read:'므스끼뿐 끄찔, 스무아 인시든 하루스 딜라뽀르깐 스그라.',kr:'작더라도 모든 인시던트는 즉시 보고해야 합니다.'}]},
+  {id:'s06',cat:'safety',indo:'Laksanakan prosedur LOTO',read:'락사나깐 프로세두르 LOTO',kr:'LOTO 절차를 이행하세요',memo:'LOTO = Lockout/Tagout (에너지 차단 잠금)',
+   sits:[{tag:'설비 수리 전',indo:'Sebelum servis, laksanakan LOTO. Kunci semua energi!',read:'스블룸 세르비스, 락사나깐 LOTO. 꾼찌 스무아 에네르기!',kr:'수리 전, LOTO를 실시하세요. 모든 에너지를 잠그세요!'},
+         {tag:'확인 점검',indo:'Semua sumber energi sudah diisolasi dan dikunci?',read:'스무아 숨베르 에네르기 수다 디이솔라시 단 디꾼찌?',kr:'모든 에너지원이 차단되고 잠겼나요?'}]},
+  {id:'s07',cat:'safety',indo:'Pakai full body harness!',read:'빠까이 풀 보디 하르네스!',kr:'전신 안전벨트를 착용하세요!',memo:'ketinggian 1.8m 이상 = 반드시 착용',
+   sits:[{tag:'고소 작업 전',indo:'Kerja di ketinggian? Wajib pakai full body harness!',read:'끄르자 디 끄띵기안? 와집 빠까이 풀 보디 하르네스!',kr:'고소 작업이요? 전신 안전벨트 반드시 착용!'},
+         {tag:'점검',indo:'Harness sudah terpasang dengan benar dan dikunci?',read:'하르네스 수다 뜨르빠상 등안 베나르 단 디꾼찌?',kr:'안전벨트 올바르게 착용되고 잠겼나요?'}]},
+  {id:'s08',cat:'safety',indo:'Kebakaran! Evakuasi segera!',read:'끄바까란! 에바꾸아시 스그라!',kr:'화재! 즉시 대피하세요!',memo:'titik kumpul = 집결지',
+   sits:[{tag:'비상 상황',indo:'Kebakaran! Semua orang evakuasi sekarang! Jangan panik!',read:'끄바까란! 스무아 오랑 에바꾸아시 스까랑! 장안 빠닉!',kr:'화재! 모두 지금 즉시 대피! 당황하지 마세요!'},
+         {tag:'대피 유도',indo:'Ikuti jalur evakuasi. Berkumpul di titik kumpul!',read:'이꿋이 잘루르 에바꾸아시. 브르꿈뿔 디 띠띡 꿈뿔!',kr:'대피로를 따라 이동. 집결지에 모이세요!'}]},
+  {id:'s09',cat:'safety',indo:'Dilarang masuk tanpa izin!',read:'딜라랑 마숙 딴빠 이진!',kr:'허가 없이 출입 금지!',memo:'dilarang = 금지됩니다',
+   sits:[{tag:'제한 구역',indo:'Area terbatas. Dilarang masuk tanpa izin!',read:'아레아 뜨르바따스. 딜라랑 마숙 딴빠 이진!',kr:'제한 구역. 허가 없이 출입 금지!'},
+         {tag:'방문자에게',indo:'Maaf, Anda tidak bisa masuk tanpa surat izin.',read:'마압, 안다 띠닥 비사 마숙 딴빠 수랏 이진.',kr:'죄송합니다, 허가증 없이는 들어오실 수 없어요.'}]},
+  {id:'s10',cat:'safety',indo:'Patuhi SOP yang berlaku!',read:'빠뚜히 에스오삐 양 브를라꾸!',kr:'적용 SOP를 준수하세요!',memo:'SOP = Standard Operating Procedure',
+   sits:[{tag:'신입 교육',indo:'Semua karyawan wajib mengikuti pelatihan SOP.',read:'스무아 까리아완 와집 믕이꿋이 쁠라띠한 에스오삐.',kr:'모든 직원은 SOP 교육에 반드시 참가해야 합니다.'},
+         {tag:'작업 전',indo:'Sebelum bekerja, pastikan kamu memahami SOPnya.',read:'스블룸 브끄르자, 빠스띠깐 까무 믕아하미 에스오삐냐.',kr:'작업 전, SOP를 이해하고 있는지 확인하세요.'}]},
+
+  // ── 일상생활 ──────────────────────────────────
+  {id:'d01',cat:'daily',indo:'Berapa harganya?',read:'브라빠 하르가냐?',kr:'얼마예요?',memo:'berapa = 얼마 / murah = 싸다 / mahal = 비싸다',
+   sits:[{tag:'시장',indo:'Permisi, ini berapa harganya?',read:'쁘르미시, 이니 브라빠 하르가냐?',kr:'실례합니다, 이거 얼마예요?'},
+         {tag:'흥정',indo:'Mahal sekali! Bisa lebih murah? Saya beli dua.',read:'마할 스까리! 비사 르비 무라? 사야 블리 두아.',kr:'너무 비싸요! 더 싸게 해줄 수 있어요? 두 개 살게요.'}]},
+  {id:'d02',cat:'daily',indo:'Nasi goreng satu, tidak pedas',read:'나시 고렝 사뚜, 띠닥 뻬다스',kr:'나시고렝 하나, 맵지 않게',memo:'bungkus = 포장해 주세요',
+   sits:[{tag:'식당 주문',indo:'Mau pesan nasi goreng satu. Tidak pedas ya, Pak!',read:'마우 뻬산 나시 고렝 사뚜. 띠닥 뻬다스 야, 빡!',kr:'나시고렝 하나 주문할게요. 맵지 않게요!'},
+         {tag:'배달·포장',indo:'Nasi goreng dua, bungkus. Tidak pedas semua.',read:'나시 고렝 두아, 붕꾸스. 띠닥 뻬다스 스무아.',kr:'나시고렝 두 개, 포장이요. 다 맵지 않게요.'}]},
+  {id:'d03',cat:'daily',indo:'Antar saya ke kantor, ya',read:'안따르 사야 끄 깐또르, 야',kr:'사무실까지 데려다주세요',memo:'antar = 데려다주다 / macet = 교통체증',
+   sits:[{tag:'Grab/택시',indo:'Pak, tolong antar saya ke PT. Krakatau POSCO.',read:'빡, 똘롱 안따르 사야 끄 PT. 끄라까따우 POSCO.',kr:'기사님, 크라카타우 포스코까지 데려다주세요.'},
+         {tag:'체증 중',indo:'Macet banget. Kira-kira berapa lama lagi?',read:'마쩻 방엣. 끼라끼라 브라빠 라마 라기?',kr:'너무 막히네요. 얼마나 더 걸릴까요?'}]},
+  {id:'d04',cat:'daily',indo:'Ada kamar kosong per bulan?',read:'아다 까마르 꼬송 뻐르 불란?',kr:'한 달에 빈 방 있어요?',memo:'kosong=비어있다 / termasuk=포함',
+   sits:[{tag:'숙소 문의',indo:'Permisi, ada kamar kosong? Untuk satu orang.',read:'쁘르미시, 아다 까마르 꼬송? 운뚝 사뚜 오랑.',kr:'실례합니다, 빈 방 있어요? 1인용이요.'},
+         {tag:'가격 협상',indo:'Berapa per bulan? AC dan WiFi termasuk?',read:'브라빠 뻐르 불란? 아쎄 단 와이파이 뜨르마숙?',kr:'한 달 얼마예요? 에어컨이랑 와이파이 포함인가요?'}]},
+  {id:'d05',cat:'daily',indo:'Saya sakit, mau ke dokter',read:'사야 사낏, 마우 끄 독떠르',kr:'저 아파서 의사에게 가려고요',memo:'kepala=머리 / perut=배 / demam=열',
+   sits:[{tag:'동료에게',indo:'Maaf, saya sakit kepala dan demam. Izin ke klinik.',read:'마압, 사야 사낏 끄빨라 단 드맘. 이진 끄 클리닉.',kr:'죄송해요, 두통이 있고 열이 나요. 의원에 가도 될까요?'},
+         {tag:'의사에게',indo:'Dokter, saya sakit perut sejak kemarin malam.',read:'독떠르, 사야 사낏 쁘룻 스작 끄마린 말람.',kr:'의사 선생님, 어젯밤부터 복통이 있어요.'}]},
+  {id:'d06',cat:'daily',indo:'Di mana toilet terdekat?',read:'디 마나 또일렛 뜨르드깟?',kr:'가장 가까운 화장실이 어디예요?',memo:'terdekat = 가장 가까운',
+   sits:[{tag:'건물 안',indo:'Permisi, di mana toilet di lantai ini?',read:'쁘르미시, 디 마나 또일렛 디 란따이 이니?',kr:'실례합니다, 이 층 화장실이 어디예요?'},
+         {tag:'식당',indo:'Mau ke toilet sebentar. Di mana ya?',read:'마우 끄 또일렛 스번따르. 디 마나 야?',kr:'잠깐 화장실 다녀올게요. 어디 있어요?'}]},
+  {id:'d07',cat:'daily',indo:'Tolong! Dompet saya hilang!',read:'똘롱! 돔뻿 사야 힐랑!',kr:'도와주세요! 지갑 잃어버렸어요!',memo:'hilang=잃어버리다 / lapor=신고하다',
+   sits:[{tag:'긴급',indo:'Tolong! Dompet dan HP saya hilang di pasar!',read:'똘롱! 돔뻿 단 하뻬 사야 힐랑 디 빠사르!',kr:'도와주세요! 시장에서 지갑이랑 핸드폰 잃어버렸어요!'},
+         {tag:'경찰서',indo:'Saya mau lapor kehilangan dompet. Di mana polisi?',read:'사야 마우 라뽀르 끄힐랑안 돔뻿. 디 마나 뽈리시?',kr:'지갑 분실 신고하려고요. 경찰서가 어디예요?'}]},
+  {id:'d08',cat:'daily',indo:'Panas sekali hari ini!',read:'빠나스 스까리 하리 이니!',kr:'오늘 정말 덥네요!',memo:'musim hujan=우기(10~3월) / kemarau=건기',
+   sits:[{tag:'동료와',indo:'Panas banget ya! Sudah 35 derajat nih.',read:'빠나스 방엣 야! 수다 35 드라잣 니.',kr:'엄청 덥죠! 벌써 35도예요.'},
+         {tag:'주의',indo:'Cuaca sangat panas. Jangan lupa minum air banyak!',read:'쭈아짜 상앗 빠나스. 장안 루빠 미눔 아이르 바냑!',kr:'날씨가 엄청 더워요. 물 많이 마시는 거 잊지 마세요!'}]},
+  {id:'d09',cat:'daily',indo:'Sudah makan siang? Makan bareng yuk!',read:'수다 마깐 시앙? 마깐 바렝 육!',kr:'점심 먹었어요? 같이 먹어요!',memo:'bareng = 같이 (캐주얼) / kantin = 구내식당',
+   sits:[{tag:'동료에게',indo:'Hei, sudah makan? Mau ke kantin bareng?',read:'헤이, 수다 마깐? 마우 끄 깐띤 바렝?',kr:'야, 밥 먹었어요? 구내식당 같이 갈래요?'},
+         {tag:'식당',indo:'Belum makan. Mau cari makan di luar. Ikut nggak?',read:'블룸 마깐. 마우 짜리 마깐 디 루아르. 이꿋 낙?',kr:'아직이요. 밖에 밥 먹으러 가려고요. 같이 갈래요?'}]},
+  {id:'d10',cat:'daily',indo:'Saya baru di sini, mohon bantuannya',read:'사야 바루 디 시니, 모혼 반뚜안냐',kr:'저 여기 처음이에요, 잘 부탁드려요',memo:'mohon bantuannya = 잘 부탁드립니다 (공손)',
+   sits:[{tag:'이웃 인사',indo:'Halo! Saya baru pindah. Mohon bantuannya, Pak.',read:'할로! 사야 바루 삔다. 모혼 반뚜안냐, 빡.',kr:'안녕하세요! 저 막 이사왔어요. 잘 부탁드려요.'},
+         {tag:'직장 첫날',indo:'Saya masih baru. Banyak yang belum tahu. Tolong ajari ya!',read:'사야 마시 바루. 바냑 양 블룸 따우. 똘롱 아자리 야!',kr:'아직 신입이에요. 모르는 게 많아요. 잘 가르쳐 주세요!'}]},
+];
+
+// ══════════════════════════════════════════════════════
+// 보충자료 1~12강 추출 어휘 (PDF 분석 결과)
+// 카테고리: 'supplement' (보충자료)
+// ══════════════════════════════════════════════════════
+const SUPPLEMENT = [
+
+  // ── 1강: 인칭대명사 · 호칭 ──────────────────────────
+  {id:'p101',cat:'supplement',sub:'인칭·호칭',
+   indo:'Saya orang Korea, bekerja di POSCO',read:'사야 오랑 꼬레아, 브끄르자 디 포스꼬',kr:'저는 한국 사람이고, 포스코에서 일합니다',memo:'Saya=저(공식) / Aku=나(캐주얼)',
+   sits:[{tag:'첫 소개',indo:'Perkenalkan, saya orang Korea. Bekerja sebagai safety officer.',read:'뻐르끄날깐, 사야 오랑 꼬레아. 브끄르자 스바가이 세이프티 오피서.',kr:'소개합니다, 저는 한국 사람이에요. 안전관리자로 일합니다.'},
+         {tag:'동료에게',indo:'Kami semua karyawan baru di sini.',read:'까미 스무아 까리아완 바루 디 시니.',kr:'저희는 모두 여기 신입 직원들이에요.'}]},
+
+  {id:'p102',cat:'supplement',sub:'인칭·호칭',
+   indo:'Bapak, ada yang bisa saya bantu?',read:'바빡, 아다 양 비사 사야 반뚜?',kr:'선생님, 도와드릴 것이 있나요?',memo:'Bapak(Pak)=남성 어른/상사 호칭',
+   sits:[{tag:'상사에게',indo:'Pak, ada yang bisa saya bantu hari ini?',read:'빡, 아다 양 비사 사야 반뚜 하리 이니?',kr:'부장님, 오늘 제가 도와드릴 것이 있나요?'},
+         {tag:'고객에게',indo:'Ibu, silakan duduk. Ada yang bisa kami bantu?',read:'이부, 실라깐 두둑. 아다 양 비사 까미 반뚜?',kr:'선생님, 앉으세요. 도와드릴 것이 있나요?'}]},
+
+  {id:'p103',cat:'supplement',sub:'인칭·호칭',
+   indo:'Kita mulai rapat sekarang',read:'끼따 물라이 라빳 스까랑',kr:'우리 지금 회의를 시작합시다',memo:'kita=우리(듣는 사람 포함) / kami=우리(상대방 제외)',
+   sits:[{tag:'회의 시작',indo:'Kita mulai rapat sekarang. Semua sudah siap?',read:'끼따 물라이 라빳 스까랑. 스무아 수다 시압?',kr:'지금 회의 시작합시다. 모두 준비됐나요?'},
+         {tag:'팀 미팅',indo:'Kami sudah menyelesaikan pekerjaan itu.',read:'까미 수다 므늘레사이깐 쁘끄르자안 이뚜.',kr:'저희는 그 작업을 완료했습니다.'}]},
+
+  // ── 2강: ada / adalah ───────────────────────────────
+  {id:'p201',cat:'supplement',sub:'ada·adalah',
+   indo:'Di sini ada bahaya, hati-hati!',read:'디 시니 아다 바하야, 하띠하띠!',kr:'여기에 위험이 있으니 조심하세요!',memo:'ada=있다 / tidak ada=없다',
+   sits:[{tag:'현장 경고',indo:'Di area ini ada bahaya listrik. Tolong hati-hati!',read:'디 아레아 이니 아다 바하야 리스뜨릭. 똘롱 하띠하띠!',kr:'이 구역에 전기 위험이 있어요. 조심해 주세요!'},
+         {tag:'점검 후',indo:'Tidak ada masalah di mesin ini. Aman.',read:'띠닥 아다 마살라 디 메신 이니. 아만.',kr:'이 기계에 문제없습니다. 안전합니다.'}]},
+
+  {id:'p202',cat:'supplement',sub:'ada·adalah',
+   indo:'Barangnya masih ada?',read:'바랑냐 마시 아다?',kr:'물건이 아직 있나요?',memo:'masih ada=아직 있다 / sudah tidak ada=이미 없다',
+   sits:[{tag:'재고 확인',indo:'APD-nya masih ada? Butuh 5 helm lagi.',read:'APD냐 마시 아다? 부뚜 5 헬름 라기.',kr:'APD 아직 있나요? 헬멧 5개 더 필요해요.'},
+         {tag:'창고 점검',indo:'Stoknya sudah tidak ada. Perlu pesan lagi.',read:'스똑냐 수다 띠닥 아다. 쁘를루 뻬산 라기.',kr:'재고가 없습니다. 다시 주문해야 해요.'}]},
+
+  {id:'p203',cat:'supplement',sub:'ada·adalah',
+   indo:'Saya adalah safety officer di sini',read:'사야 아달라 세이프티 오피서 디 시니',kr:'저는 여기 안전관리자입니다',memo:'adalah=이다 (격식체, 구어에서는 생략)',
+   sits:[{tag:'공식 소개',indo:'Saya adalah safety officer yang bertugas di area produksi.',read:'사야 아달라 세이프티 오피서 양 브르뚜가스 디 아레아 프로둑시.',kr:'저는 생산 구역 담당 안전관리자입니다.'},
+         {tag:'업무 확인',indo:'Ini bukan tanggung jawab saya. Itu tanggung jawab tim lain.',read:'이니 부깐 땅궁 자왑 사야. 이뚜 땅궁 자왑 띰 라인.',kr:'이것은 제 책임이 아닙니다. 그것은 다른 팀 책임이에요.'}]},
+
+  // ── 3강: 지시어 ─────────────────────────────────────
+  {id:'p301',cat:'supplement',sub:'지시어',
+   indo:'Ini jalur evakuasi. Ikuti dari sini!',read:'이니 잘루르 에바꾸아시. 이꿋이 다리 시니!',kr:'이것이 대피로입니다. 여기서부터 따라가세요!',memo:'ini=이것/여기 가까운 것',
+   sits:[{tag:'비상 대피',indo:'Ini jalur evakuasi. Semua ikuti dari sini!',read:'이니 잘루르 에바꾸아시. 스무아 이꿋이 다리 시니!',kr:'이것이 대피로입니다. 모두 여기서부터 따라가세요!'},
+         {tag:'장비 설명',indo:'Ini alat pemadam kebakaran. Simpan di sini.',read:'이니 알랏 뻐마담 끄바까란. 심빤 디 시니.',kr:'이것이 소화기입니다. 여기에 보관하세요.'}]},
+
+  {id:'p302',cat:'supplement',sub:'지시어',
+   indo:'Itu area berbahaya, jangan ke sana',read:'이뚜 아레아 브르바하야, 장안 끄 사나',kr:'저것은 위험 구역이니 저리 가지 마세요',memo:'itu=저것/그것 / jangan=~하지 마세요',
+   sits:[{tag:'위험 구역',indo:'Itu area berbahaya. Dilarang masuk tanpa izin!',read:'이뚜 아레아 브르바하야. 딜라랑 마숙 딴빠 이진!',kr:'저것은 위험 구역입니다. 허가 없이 출입 금지!'},
+         {tag:'방향 안내',indo:'Atasan saya ada di situ. Di ruang rapat lantai 2.',read:'아따산 사야 아다 디 시뚜. 디 루앙 라빳 란따이 2.',kr:'제 상사가 거기에 있어요. 2층 회의실에요.'}]},
+
+  {id:'p303',cat:'supplement',sub:'지시어',
+   indo:'Di sini macet, cari jalan lain',read:'디 시니 마쩻, 짜리 잘란 라인',kr:'여기 막히니 다른 길을 찾아요',memo:'di sini=여기에 / di sana=저기에',
+   sits:[{tag:'교통 상황',indo:'Di sini macet sekali pagi ini. Lebih baik naik ojek.',read:'디 시니 마쩻 스까리 빠기 이니. 르비 바익 나익 오젝.',kr:'오늘 아침 여기 많이 막히네요. 오젝 타는 게 나을 것 같아요.'},
+         {tag:'길 안내',indo:'Kantor ada di sana, belok kanan dari sini.',read:'깐또르 아다 디 사나, 블록 까난 다리 시니.',kr:'사무실은 저기 있어요, 여기서 오른쪽으로 도세요.'}]},
+
+  // ── 4강: 부정문 ─────────────────────────────────────
+  {id:'p401',cat:'supplement',sub:'부정문',
+   indo:'Jangan merokok di area ini!',read:'장안 므로꼭 디 아레아 이니!',kr:'이 구역에서 담배 피우지 마세요!',memo:'jangan=~하지 마라 (금지 명령)',
+   sits:[{tag:'금연 구역',indo:'Jangan merokok di sini! Ini area produksi.',read:'장안 므로꼭 디 시니! 이니 아레아 프로둑시.',kr:'여기서 흡연 금지! 이곳은 생산 구역입니다.'},
+         {tag:'안전 지시',indo:'Jangan berdiri di bawah crane yang sedang bekerja!',read:'장안 브르디리 디 바와 크레인 양 스당 브끄르자!',kr:'작동 중인 크레인 아래에 서 있지 마세요!'}]},
+
+  {id:'p402',cat:'supplement',sub:'부정문',
+   indo:'Ini bukan cara yang benar',read:'이니 부깐 짜라 양 베나르',kr:'이것은 올바른 방법이 아닙니다',memo:'bukan=명사 부정 / tidak=동사·형용사 부정',
+   sits:[{tag:'작업 교정',indo:'Ini bukan cara yang benar. Ikuti SOP yang sudah ada.',read:'이니 부깐 짜라 양 베나르. 이꿋이 에스오삐 양 수다 아다.',kr:'이것은 올바른 방법이 아닙니다. 기존 SOP를 따르세요.'},
+         {tag:'규정 설명',indo:'Ini bukan pelanggaran kecil. Ini serius.',read:'이니 부깐 뻐랑가란 끄찔. 이니 세리우스.',kr:'이것은 작은 위반이 아닙니다. 심각합니다.'}]},
+
+  {id:'p403',cat:'supplement',sub:'부정문',
+   indo:'Saya belum siap, butuh waktu lagi',read:'사야 블룸 시압, 부뚜 왁뚜 라기',kr:'아직 준비가 안 됐어요, 시간이 더 필요합니다',memo:'belum=아직 ~않다 (미래 가능성 있음)',
+   sits:[{tag:'작업 준비',indo:'Alatnya belum siap. Mohon tunggu 10 menit.',read:'알라뜨냐 블룸 시압. 모혼 뚱구 10 므닛.',kr:'장비가 아직 준비가 안 됐어요. 10분만 기다려 주세요.'},
+         {tag:'보고서',indo:'Laporan belum selesai karena data masih kurang.',read:'라뽀란 블룸 슬레사이 까르나 다따 마시 꾸랑.',kr:'데이터가 아직 부족해서 보고서가 완성되지 않았어요.'}]},
+
+  {id:'p404',cat:'supplement',sub:'부정문',
+   indo:'Jalan ini tidak macet sekarang',read:'잘란 이니 띠닥 마쩻 스까랑',kr:'이 길은 지금 막히지 않습니다',memo:'tidak=동사·형용사 부정 (완전 부정)',
+   sits:[{tag:'출퇴근',indo:'Jalan tol tidak macet pagi ini. Bisa berangkat lebih cepat.',read:'잘란 똘 띠닥 마쩻 빠기 이니. 비사 브랑깟 르비 쩨빳.',kr:'오늘 아침 고속도로 안 막혀요. 더 일찍 출발할 수 있겠어요.'},
+         {tag:'작업 상태',indo:'Mesin ini tidak rusak. Hanya perlu dibersihkan.',read:'메신 이니 띠닥 루삭. 하냐 쁘를루 디베르시깐.',kr:'이 기계는 고장나지 않았어요. 청소만 하면 됩니다.'}]},
+
+  // ── 5강: 조동사 ─────────────────────────────────────
+  {id:'p501',cat:'supplement',sub:'조동사',
+   indo:'Bisa tolong jelaskan sekali lagi?',read:'비사 똘롱 즐라스깐 스까리 라기?',kr:'한 번 더 설명해 주실 수 있나요?',memo:'bisa=할 수 있다 (능력/가능)',
+   sits:[{tag:'업무 요청',indo:'Bisa tolong jelaskan cara pakai alat ini?',read:'비사 똘롱 즐라스깐 짜라 빠까이 알랏 이니?',kr:'이 장비 사용법을 설명해 주실 수 있나요?'},
+         {tag:'언어 소통',indo:'Bisa bicara lebih pelan? Saya masih belajar bahasa Indonesia.',read:'비사 비짜라 르비 쁠란? 사야 마시 블라자르 바하사 인도네시아.',kr:'더 천천히 말씀해 주실 수 있어요? 아직 인도네시아어 배우는 중이에요.'}]},
+
+  {id:'p502',cat:'supplement',sub:'조동사',
+   indo:'Harus pakai APD sebelum masuk',read:'하루스 빠까이 APD 스블룸 마숙',kr:'진입 전 APD를 착용해야 합니다',memo:'harus=반드시 ~해야 한다 (의무)',
+   sits:[{tag:'구역 진입',indo:'Harus pakai APD lengkap sebelum masuk area ini.',read:'하루스 빠까이 APD 릉깝 스블룸 마숙 아레아 이니.',kr:'이 구역 진입 전 APD를 완전히 착용해야 합니다.'},
+         {tag:'SOP 교육',indo:'Semua karyawan harus ikut pelatihan safety setiap bulan.',read:'스무아 까리아완 하루스 이꿋 쁠라띠한 세이프티 스띠압 불란.',kr:'모든 직원은 매월 안전 교육에 참가해야 합니다.'}]},
+
+  {id:'p503',cat:'supplement',sub:'조동사',
+   indo:'Boleh saya tanya sebentar?',read:'볼레 사야 따냐 스번따르?',kr:'잠깐 여쭤봐도 될까요?',memo:'boleh=~해도 된다 (허가)',
+   sits:[{tag:'정중한 질문',indo:'Permisi, boleh saya tanya sebentar?',read:'쁘르미시, 볼레 사야 따냐 스번따르?',kr:'실례합니다, 잠깐 여쭤봐도 될까요?'},
+         {tag:'출입 요청',indo:'Apakah saya boleh masuk ke area ini?',read:'아빠까 사야 볼레 마숙 끄 아레아 이니?',kr:'이 구역에 들어가도 될까요?'}]},
+
+  {id:'p504',cat:'supplement',sub:'조동사',
+   indo:'Saya ingin belajar bahasa Indonesia lebih baik',read:'사야 잉인 블라자르 바하사 인도네시아 르비 바익',kr:'인도네시아어를 더 잘 배우고 싶습니다',memo:'ingin=원하다, ~하고 싶다',
+   sits:[{tag:'학습 의지',indo:'Saya ingin bisa berbicara bahasa Indonesia dengan lancar.',read:'사야 잉인 비사 브르비짜라 바하사 인도네시아 등안 란짜르.',kr:'인도네시아어를 유창하게 말할 수 있으면 좋겠어요.'},
+         {tag:'업무 요청',indo:'Saya ingin meminta bantuan untuk mengisi formulir ini.',read:'사야 잉인 므민따 반뚜안 운뚝 믕이시 포르물리르 이니.',kr:'이 서류 작성하는 것을 도움받고 싶어요.'}]},
+
+  {id:'p505',cat:'supplement',sub:'조동사',
+   indo:'Anda perlu istirahat yang cukup',read:'안다 쁘를루 이스띠라핫 양 쭈꿉',kr:'충분한 휴식이 필요합니다',memo:'perlu=~할 필요가 있다',
+   sits:[{tag:'건강 조언',indo:'Anda terlihat lelah. Perlu istirahat yang cukup.',read:'안다 뜨를리핫 를라. 쁘를루 이스띠라핫 양 쭈꿉.',kr:'많이 피곤해 보이세요. 충분한 휴식이 필요합니다.'},
+         {tag:'작업 전',indo:'Sebelum kerja berat, perlu pemanasan dulu.',read:'스블룸 끄르자 브랏, 쁘를루 뻐마나산 둘루.',kr:'힘든 작업 전에 준비운동이 필요합니다.'}]},
+
+  // ── 6강: 시제 표현어 ─────────────────────────────────
+  {id:'p601',cat:'supplement',sub:'시제',
+   indo:'Inspeksi sudah selesai semua',read:'인스뻭시 수다 슬레사이 스무아',kr:'점검이 모두 완료됐습니다',memo:'sudah=이미 완료 (과거)',
+   sits:[{tag:'상사 보고',indo:'Pak, inspeksi harian sudah selesai semua.',read:'빡, 인스뻭시 하리안 수다 슬레사이 스무아.',kr:'부장님, 오늘 일일 점검이 모두 완료됐습니다.'},
+         {tag:'팀 확인',indo:'Semua APD sudah dicek dan dalam kondisi baik.',read:'스무아 APD 수다 디쩩 단 달람 꼰디시 바익.',kr:'모든 APD 점검 완료, 상태 양호합니다.'}]},
+
+  {id:'p602',cat:'supplement',sub:'시제',
+   indo:'Saya sedang membuat laporan sekarang',read:'사야 스당 믐부앗 라뽀란 스까랑',kr:'지금 보고서 작성 중입니다',memo:'sedang=~하는 중 (진행)',
+   sits:[{tag:'업무 중 전화',indo:'Maaf, saya sedang rapat sekarang. Bisa telepon nanti?',read:'마압, 사야 스당 라빳 스까랑. 비사 뗄레뽄 난띠?',kr:'죄송해요, 지금 회의 중이에요. 나중에 전화해 주실 수 있어요?'},
+         {tag:'작업 진행',indo:'Tim sedang melakukan perbaikan di lantai 3.',read:'띰 스당 믈라꾸깐 쁘르바이깐 디 란따이 3.',kr:'팀이 현재 3층에서 수리 작업 중입니다.'}]},
+
+  {id:'p603',cat:'supplement',sub:'시제',
+   indo:'Proyek akan mulai minggu depan',read:'프로옉 아깐 물라이 밍구 드빤',kr:'프로젝트는 다음 주에 시작될 것입니다',memo:'akan=~할 것이다 (미래)',
+   sits:[{tag:'일정 공유',indo:'Safety training akan mulai Senin depan jam 8 pagi.',read:'세이프티 뜨레이닝 아깐 물라이 스닌 드빤 잠 8 빠기.',kr:'안전 교육이 다음 주 월요일 오전 8시에 시작됩니다.'},
+         {tag:'예정 보고',indo:'Kami akan menyelesaikan pekerjaan ini sebelum jam 5 sore.',read:'까미 아깐 므늘레사이깐 쁘끄르자안 이니 스블룸 잠 5 소레.',kr:'저희가 오후 5시 전에 이 작업을 완료할 것입니다.'}]},
+
+  {id:'p604',cat:'supplement',sub:'시제',
+   indo:'Mesin masih berjalan dengan baik',read:'메신 마시 브르잘란 등안 바익',kr:'기계가 아직 잘 작동하고 있습니다',memo:'masih=아직도, 여전히',
+   sits:[{tag:'장비 점검',indo:'Alat ini masih berfungsi dengan baik. Tidak perlu diganti.',read:'알랏 이니 마시 브르풍시 등안 바익. 띠닥 쁘를루 디간띠.',kr:'이 장비는 아직 잘 작동합니다. 교체할 필요 없어요.'},
+         {tag:'재고 확인',indo:'APD-nya masih cukup untuk 2 minggu ke depan.',read:'APD냐 마시 쭈꿉 운뚝 2 밍구 끄 드빤.',kr:'APD는 앞으로 2주 분량이 아직 충분합니다.'}]},
+
+  {id:'p605',cat:'supplement',sub:'시제',
+   indo:'Baru saja ada insiden kecil di lantai 2',read:'바루 사자 아다 인시든 끄찔 디 란따이 2',kr:'방금 2층에서 작은 인시던트가 있었습니다',memo:'baru=막, 방금 (최근 완료)',
+   sits:[{tag:'즉시 보고',indo:'Pak! Baru saja ada insiden di area produksi!',read:'빡! 바루 사자 아다 인시든 디 아레아 프로둑시!',kr:'부장님! 방금 생산 구역에서 인시던트가 발생했습니다!'},
+         {tag:'상황 설명',indo:'Karyawan baru saja selesai evakuasi. Semua aman.',read:'까리아완 바루 사자 슬레사이 에바꾸아시. 스무아 아만.',kr:'직원들이 방금 대피를 마쳤습니다. 모두 안전합니다.'}]},
+
+  // ── 7강: 의문문 ─────────────────────────────────────
+  {id:'p701',cat:'supplement',sub:'의문문',
+   indo:'Anda bekerja di mana?',read:'안다 브끄르자 디 마나?',kr:'당신은 어디서 일하나요?',memo:'di mana=어디에 (장소)',
+   sits:[{tag:'첫 만남',indo:'Maaf, Anda bekerja di departemen mana?',read:'마압, 안다 브끄르자 디 데빠르떼멘 마나?',kr:'실례지만, 어느 부서에서 일하세요?'},
+         {tag:'업무 확인',indo:'Titik kumpul ada di mana kalau ada kebakaran?',read:'띠띡 꿈뿔 아다 디 마나 깔라우 아다 끄바까란?',kr:'화재 시 집결지가 어디에 있나요?'}]},
+
+  {id:'p702',cat:'supplement',sub:'의문문',
+   indo:'Kapan jadwal inspeksi berikutnya?',read:'까빤 자드왈 인스뻭시 브리꿋냐?',kr:'다음 점검 일정이 언제인가요?',memo:'kapan=언제',
+   sits:[{tag:'일정 확인',indo:'Kapan safety meeting berikutnya diadakan?',read:'까빤 세이프티 미팅 브리꿋냐 디아다깐?',kr:'다음 안전 미팅이 언제 열리나요?'},
+         {tag:'작업 계획',indo:'Maintenance dijadwalkan kapan untuk bulan ini?',read:'메인떼난스 디자드왈깐 까빤 운뚝 불란 이니?',kr:'이번 달 유지보수가 언제로 예정되어 있나요?'}]},
+
+  {id:'p703',cat:'supplement',sub:'의문문',
+   indo:'Mengapa mesin ini sering rusak?',read:'믕아빠 메신 이니 스링 루삭?',kr:'왜 이 기계는 자주 고장나나요?',memo:'mengapa/kenapa=왜 (이유)',
+   sits:[{tag:'문제 파악',indo:'Mengapa alat ini tidak berfungsi? Ada masalah apa?',read:'믕아빠 알랏 이니 띠닥 브르풍시? 아다 마살라 아빠?',kr:'왜 이 장비가 작동을 안 하나요? 무슨 문제가 있나요?'},
+         {tag:'사고 조사',indo:'Kenapa kecelakaan itu bisa terjadi? Perlu diselidiki.',read:'끄나빠 끄쩰라까안 이뚜 비사 뜨르자디? 쁘를루 디슬리디끼.',kr:'왜 그 사고가 발생했나요? 조사가 필요합니다.'}]},
+
+  {id:'p704',cat:'supplement',sub:'의문문',
+   indo:'Berapa lama proses perbaikan ini?',read:'브라빠 라마 프로세스 쁘르바이깐 이니?',kr:'이 수리 과정이 얼마나 걸리나요?',memo:'berapa lama=얼마나 오래',
+   sits:[{tag:'작업 시간',indo:'Berapa lama waktu yang dibutuhkan untuk perbaikan ini?',read:'브라빠 라마 왁뚜 양 디부뚜깐 운뚝 쁘르바이깐 이니?',kr:'이 수리에 필요한 시간이 얼마나 되나요?'},
+         {tag:'일정 조율',indo:'Berapa jam lembur yang diizinkan per hari?',read:'브라빠 잠 름부르 양 디이지닌 뻐르 하리?',kr:'하루에 허용되는 초과근무 시간이 몇 시간인가요?'}]},
+
+  // ── 8강: 숫자 ───────────────────────────────────────
+  {id:'p801',cat:'supplement',sub:'숫자',
+   indo:'Rapat dimulai pukul 9 tepat',read:'라빳 디물라이 뿔꿀 9 떼빳',kr:'회의는 정확히 9시에 시작됩니다',memo:'pukul=~시 (격식) / jam=시간/~시 (일반)',
+   sits:[{tag:'일정 알림',indo:'Safety briefing dimulai pukul 7 pagi. Jangan terlambat!',read:'세이프티 브리핑 디물라이 뿔꿀 7 빠기. 장안 뜨를람밧!',kr:'안전 브리핑이 오전 7시에 시작됩니다. 늦지 마세요!'},
+         {tag:'퇴근 시간',indo:'Jam kerja sampai pukul 5 sore. Lembur harus izin dulu.',read:'잠 끄르자 삼빠이 뿔꿀 5 소레. 름부르 하루스 이진 둘루.',kr:'근무 시간은 오후 5시까지입니다. 초과근무는 먼저 허가받아야 해요.'}]},
+
+  {id:'p802',cat:'supplement',sub:'숫자',
+   indo:'Ada 3 orang karyawan yang tidak hadir hari ini',read:'아다 3 오랑 까리아완 양 띠닥 하디르 하리 이니',kr:'오늘 결근한 직원이 3명 있습니다',memo:'기수+orang=~명 / orang=사람',
+   sits:[{tag:'출결 보고',indo:'Hari ini ada 2 orang sakit dan 1 orang izin.',read:'하리 이니 아다 2 오랑 사낏 단 1 오랑 이진.',kr:'오늘 2명이 아프고 1명이 허가를 받았습니다.'},
+         {tag:'팀 편성',indo:'Tim kita terdiri dari 10 orang termasuk supervisor.',read:'띰 끼따 뜨르디리 다리 10 오랑 뜨르마숙 수뻐르바이저.',kr:'우리 팀은 감독자 포함 10명으로 구성됩니다.'}]},
+
+  {id:'p803',cat:'supplement',sub:'숫자',
+   indo:'Toilet ada di lantai 2 sebelah kanan',read:'또일렛 아다 디 란따이 2 스블라 까난',kr:'화장실은 2층 오른쪽에 있습니다',memo:'lantai=층 / pertama=첫째(1층은 lantai 1)',
+   sits:[{tag:'길 안내',indo:'Ruang P3K ada di lantai 1, dekat pintu masuk.',read:'루앙 P3K 아다 디 란따이 1, 드깟 삔뚜 마숙.',kr:'응급처치실은 1층 입구 근처에 있습니다.'},
+         {tag:'집결지',indo:'Titik kumpul ada di lantai dasar, di luar gedung.',read:'띠띡 꿈뿔 아다 디 란따이 다사르, 디 루아르 그둥.',kr:'집결지는 건물 밖 1층에 있습니다.'}]},
+
+  // ── 9강: 빈도부사 ────────────────────────────────────
+  {id:'p901',cat:'supplement',sub:'빈도부사',
+   indo:'Saya selalu cek APD setiap pagi',read:'사야 슬랄루 쩩 APD 스띠압 빠기',kr:'저는 매일 아침 항상 APD를 점검합니다',memo:'selalu=항상 (가장 높은 빈도)',
+   sits:[{tag:'습관 표현',indo:'Kami selalu lakukan safety briefing sebelum mulai kerja.',read:'까미 슬랄루 라꾸깐 세이프티 브리핑 스블룸 물라이 끄르자.',kr:'저희는 항상 작업 시작 전에 안전 브리핑을 합니다.'},
+         {tag:'규칙 강조',indo:'Selalu pakai helm di area produksi, tanpa pengecualian!',read:'슬랄루 빠까이 헬름 디 아레아 프로둑시, 딴빠 쁭으쭈알리안!',kr:'생산 구역에서는 예외 없이 항상 헬멧을 착용하세요!'}]},
+
+  {id:'p902',cat:'supplement',sub:'빈도부사',
+   indo:'Sering ada kemacetan di jalan ini pagi hari',read:'스링 아다 끄마쩻딴 디 잘란 이니 빠기 하리',kr:'이 길은 아침에 자주 막힙니다',memo:'sering=자주',
+   sits:[{tag:'출퇴근 팁',indo:'Jalan ini sering macet jam 7-9 pagi. Lebih baik berangkat lebih awal.',read:'잘란 이니 스링 마쩻 잠 7-9 빠기. 르비 바익 브랑깟 르비 아왈.',kr:'이 길은 오전 7~9시에 자주 막혀요. 더 일찍 출발하는 게 나아요.'},
+         {tag:'안전 점검',indo:'Mesin ini sering bermasalah. Perlu perawatan rutin.',read:'메신 이니 스링 브르마살라. 쁘를루 쁘라와딴 루띤.',kr:'이 기계는 자주 문제가 생겨요. 정기 유지보수가 필요합니다.'}]},
+
+  {id:'p903',cat:'supplement',sub:'빈도부사',
+   indo:'Kadang-kadang ada lembur di hari Sabtu',read:'까당까당 아다 름부르 디 하리 삽뚜',kr:'가끔 토요일에 초과근무가 있습니다',memo:'kadang-kadang=가끔',
+   sits:[{tag:'일정 안내',indo:'Kadang-kadang ada meeting mendadak, harap siap.',read:'까당까당 아다 미팅 믄다닥, 하랍 시압.',kr:'가끔 갑작스러운 미팅이 있으니 준비해 두세요.'},
+         {tag:'날씨 주의',indo:'Kadang-kadang hujan tiba-tiba di sore hari. Bawa payung.',read:'까당까당 후잔 띠바띠바 디 소레 하리. 바와 빠융.',kr:'가끔 오후에 갑자기 비가 옵니다. 우산 챙기세요.'}]},
+
+  // ── 10강: 전치사 ─────────────────────────────────────
+  {id:'p1001',cat:'supplement',sub:'전치사',
+   indo:'Kunci ada di atas meja saya',read:'꾼찌 아다 디 아따스 메자 사야',kr:'열쇠는 제 책상 위에 있습니다',memo:'di atas=위에 / di bawah=아래에 / di depan=앞에',
+   sits:[{tag:'물건 위치',indo:'Dokumen ada di dalam laci meja saya.',read:'도꾸멘 아다 디 달람 라찌 메자 사야.',kr:'서류는 제 책상 서랍 안에 있습니다.'},
+         {tag:'장비 위치',indo:'APAR ada di sebelah kiri pintu masuk.',read:'APAR 아다 디 스블라 끼리 삔뚜 마숙.',kr:'소화기는 입구 왼쪽에 있습니다.'}]},
+
+  {id:'p1002',cat:'supplement',sub:'전치사',
+   indo:'Saya berangkat ke kantor dari rumah jam 7',read:'사야 브랑깟 끄 깐또르 다리 루마 잠 7',kr:'저는 집에서 7시에 사무실로 출발합니다',memo:'ke=~로 (방향) / dari=~에서 (출발점)',
+   sits:[{tag:'출퇴근',indo:'Dari rumah ke kantor butuh waktu 1 jam naik motor.',read:'다리 루마 끄 깐또르 부뚜 왁뚜 1 잠 나익 모또르.',kr:'집에서 사무실까지 오토바이로 1시간 걸려요.'},
+         {tag:'현장 이동',indo:'Kita pergi ke area produksi dari ruang meeting sekarang.',read:'끼따 뻐르기 끄 아레아 프로둑시 다리 루앙 미팅 스까랑.',kr:'지금 회의실에서 생산 구역으로 이동합시다.'}]},
+
+  {id:'p1003',cat:'supplement',sub:'전치사',
+   indo:'Tolong kirim laporan kepada saya',read:'똘롱 끼림 라뽀란 끄빠다 사야',kr:'저에게 보고서를 보내 주세요',memo:'kepada=~에게 (사람에게 전달)',
+   sits:[{tag:'업무 지시',indo:'Tolong kirim hasil inspeksi kepada saya sebelum jam 3.',read:'똘롱 끼림 하실 인스뻭시 끄빠다 사야 스블룸 잠 3.',kr:'3시 전에 점검 결과를 저에게 보내 주세요.'},
+         {tag:'연락 요청',indo:'Laporkan semua insiden kepada supervisor segera.',read:'라뽀르깐 스무아 인시든 끄빠다 수뻐르바이저 스그라.',kr:'모든 인시던트를 즉시 감독자에게 보고하세요.'}]},
+
+  {id:'p1004',cat:'supplement',sub:'전치사',
+   indo:'Bekerja di sini sampai jam 5 sore',read:'브끄르자 디 시니 삼빠이 잠 5 소레',kr:'여기서 오후 5시까지 일합니다',memo:'sampai=~까지 (시간·장소)',
+   sits:[{tag:'근무 시간',indo:'Kita bekerja dari jam 8 pagi sampai jam 5 sore.',read:'끼따 브끄르자 다리 잠 8 빠기 삼빠이 잠 5 소레.',kr:'우리는 오전 8시부터 오후 5시까지 일합니다.'},
+         {tag:'작업 완료',indo:'Pekerjaan ini harus selesai sampai besok pagi.',read:'쁘끄르자안 이니 하루스 슬레사이 삼빠이 베속 빠기.',kr:'이 작업은 내일 아침까지 완료되어야 합니다.'}]},
+
+  // ── 11강: 접속사 ─────────────────────────────────────
+  {id:'p1101',cat:'supplement',sub:'접속사',
+   indo:'Pakai helm dan rompi keselamatan',read:'빠까이 헬름 단 롬삐 끄슬라마딴',kr:'헬멧과 안전조끼를 착용하세요',memo:'dan=그리고 (나열)',
+   sits:[{tag:'APD 착용',indo:'Wajib pakai helm, rompi, dan sepatu safety di sini.',read:'와집 빠까이 헬름, 롬삐, 단 스빠뚜 세이프티 디 시니.',kr:'여기서는 헬멧, 안전조끼, 안전화를 반드시 착용해야 합니다.'},
+         {tag:'작업 완료',indo:'Saya sudah cek mesin dan buat laporannya.',read:'사야 수다 쩩 메신 단 부앗 라뽀란냐.',kr:'기계 점검하고 보고서도 작성했습니다.'}]},
+
+  {id:'p1102',cat:'supplement',sub:'접속사',
+   indo:'Mau minum kopi atau teh?',read:'마우 미눔 꼬삐 아따우 떼?',kr:'커피 드시겠어요, 아니면 차 드시겠어요?',memo:'atau=또는, 아니면 (선택)',
+   sits:[{tag:'손님 대접',indo:'Silakan duduk. Mau minum kopi atau air putih?',read:'실라깐 두둑. 마우 미눔 꼬삐 아따우 아이르 뿌띠?',kr:'앉으세요. 커피 드시겠어요, 아니면 생수 드시겠어요?'},
+         {tag:'일정 조율',indo:'Meeting bisa hari Selasa atau Rabu. Yang mana lebih baik?',read:'미팅 비사 하리 슬라사 아따우 라부. 양 마나 르비 바익?',kr:'미팅을 화요일이나 수요일에 할 수 있어요. 어느 날이 더 좋아요?'}]},
+
+  {id:'p1103',cat:'supplement',sub:'접속사',
+   indo:'Saya sudah coba, tetapi masih belum berhasil',read:'사야 수다 쪼바, 떼따삐 마시 블룸 브르하실',kr:'시도해봤지만 아직 성공하지 못했습니다',memo:'tetapi/tapi=하지만, 그러나',
+   sits:[{tag:'진행 보고',indo:'Sudah dicoba diperbaiki, tetapi masih ada masalah.',read:'수다 디쪼바 디뻐르바이끼, 떼따삐 마시 아다 마살라.',kr:'수리를 시도해봤지만, 아직도 문제가 있습니다.'},
+         {tag:'노력 표현',indo:'Saya sudah belajar bahasa Indonesia, tapi masih perlu banyak latihan.',read:'사야 수다 블라자르 바하사 인도네시아, 따삐 마시 쁘를루 바냑 라띠한.',kr:'인도네시아어 공부했는데, 아직 많은 연습이 필요합니다.'}]},
+
+  {id:'p1104',cat:'supplement',sub:'접속사',
+   indo:'Karena hujan, kita terlambat tiba',read:'까르나 후잔, 끼따 뜨를람밧 띠바',kr:'비 때문에 늦게 도착했습니다',memo:'karena=왜냐하면, ~때문에 (이유)',
+   sits:[{tag:'지각 사유',indo:'Maaf terlambat, karena ada kecelakaan di jalan tadi.',read:'마압 뜨를람밧, 까르나 아다 끄쩰라까안 디 잘란 따디.',kr:'죄송합니다 늦었어요, 아까 길에서 사고가 있었거든요.'},
+         {tag:'작업 지연',indo:'Pekerjaan terlambat karena cuaca hujan deras.',read:'쁘끄르자안 뜨를람밧 까르나 쭈아짜 후잔 드라스.',kr:'폭우 때문에 작업이 지연됐습니다.'}]},
+
+  {id:'p1105',cat:'supplement',sub:'접속사',
+   indo:'Kalau ada masalah, langsung lapor ke saya',read:'깔라우 아다 마살라, 랑숭 라뽀르 끄 사야',kr:'문제가 있으면 바로 저에게 보고하세요',memo:'kalau/jika=만약 ~라면 (조건)',
+   sits:[{tag:'안전 지시',indo:'Kalau ada bahaya, langsung tekan tombol darurat!',read:'깔라우 아다 바하야, 랑숭 떼깐 똠볼 다루랏!',kr:'위험이 있으면 즉시 비상 버튼을 누르세요!'},
+         {tag:'업무 지침',indo:'Jika tidak tahu SOP-nya, tanya dulu ke supervisor.',read:'지까 띠닥 따우 에스오삐냐, 따냐 둘루 끄 수뻐르바이저.',kr:'SOP를 모르면 먼저 감독자에게 물어보세요.'}]},
+
+  // ── 12강: 비교급 ─────────────────────────────────────
+  {id:'p1201',cat:'supplement',sub:'비교급',
+   indo:'Cara ini lebih aman daripada cara lama',read:'짜라 이니 르비 아만 다리빠다 짜라 라마',kr:'이 방법이 예전 방법보다 더 안전합니다',memo:'lebih~daripada=~보다 더',
+   sits:[{tag:'방법 개선',indo:'Prosedur baru ini lebih aman daripada prosedur lama.',read:'프로세두르 바루 이니 르비 아만 다리빠다 프로세두르 라마.',kr:'새 절차가 기존 절차보다 더 안전합니다.'},
+         {tag:'장비 비교',indo:'Alat baru ini lebih ringan dan lebih kuat daripada yang lama.',read:'알랏 바루 이니 르비 링안 단 르비 꾸앗 다리빠다 양 라마.',kr:'새 장비는 기존 것보다 더 가볍고 더 튼튼합니다.'}]},
+
+  {id:'p1202',cat:'supplement',sub:'비교급',
+   indo:'Bandung lebih sejuk daripada Jakarta',read:'반둥 르비 스죽 다리빠다 자카르따',kr:'반둥이 자카르타보다 더 시원합니다',memo:'sejuk=시원하다 / panas=덥다',
+   sits:[{tag:'날씨 비교',indo:'Kota Cilegon lebih panas daripada Bandung.',read:'꼬따 찔레곤 르비 빠나스 다리빠다 반둥.',kr:'찔레곤은 반둥보다 더 덥습니다.'},
+         {tag:'생활 팁',indo:'Di dalam pabrik jauh lebih panas daripada di luar.',read:'디 달람 빠브릭 자우 르비 빠나스 다리빠다 디 루아르.',kr:'공장 안이 밖보다 훨씬 더 덥습니다.'}]},
+
+  {id:'p1203',cat:'supplement',sub:'비교급',
+   indo:'Ini tempat paling aman di area ini',read:'이니 뗌빳 빨링 아만 디 아레아 이니',kr:'이곳이 이 구역에서 가장 안전한 곳입니다',memo:'paling/ter-=가장 (최상급)',
+   sits:[{tag:'대피 유도',indo:'Kumpul di sini! Ini titik kumpul yang paling aman.',read:'꿈뿔 디 시니! 이니 띠띡 꿈뿔 양 빨링 아만.',kr:'여기 모이세요! 이곳이 가장 안전한 집결지입니다.'},
+         {tag:'경로 안내',indo:'Jalur ini adalah jalur evakuasi tercepat.',read:'잘루르 이니 아달라 잘루르 에바꾸아시 뜨르쩨빳.',kr:'이 경로가 가장 빠른 대피로입니다.'}]},
+
+  {id:'p1204',cat:'supplement',sub:'비교급',
+   indo:'Semakin cepat dilaporkan, semakin baik',read:'스마낀 쩨빳 딜라뽀르깐, 스마낀 바익',kr:'빨리 보고할수록 더 좋습니다',memo:'semakin~semakin=~할수록 더',
+   sits:[{tag:'보고 독려',indo:'Semakin cepat insiden dilaporkan, semakin mudah diselesaikan.',read:'스마낀 쩨빳 인시든 딜라뽀르깐, 스마낀 무다 디슬레사이깐.',kr:'인시던트를 빨리 보고할수록, 해결하기도 더 쉽습니다.'},
+         {tag:'학습 격려',indo:'Semakin sering berlatih, semakin lancar bahasa Indonesia Anda.',read:'스마낀 스링 브를라띠, 스마낀 란짜르 바하사 인도네시아 안다.',kr:'연습을 많이 할수록 인도네시아어가 더 유창해집니다.'}]},
+];
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let S = {
+  custom:[],
+  todayIds:[], todayDone:[], todayDate:'',
+  streak:0, lastStudy:'',
+  bookmarks:[],
+};
+
+const KEY = 'bahasa_app_v2';
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY)||'{}');
+    Object.assign(S,d);
+  }catch(e){}
+}
+
+function allWords(){ return [...BUILT,...SUPPLEMENT,...S.custom]; }
+
+/* ══════════════════════════════════════════════════
+   TODAY 10
+══════════════════════════════════════════════════ */
+function todayKey(){
+  const d=new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function pickToday(){
+  const today=todayKey();
+  if(S.todayDate===today && S.todayIds.length>=10) return;
+
+  const pool=allWords();
+  const cats={basic:[],safety:[],daily:[],supplement:[],custom:[]};
+  pool.forEach(w=>{ if(cats[w.cat]) cats[w.cat].push(w.id); });
+  const shuf=a=>{ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+  Object.values(cats).forEach(shuf);
+
+  const picks=[];
+  // Aim: 3 basic, 3 safety, 3 daily, 1 custom (fallback to others)
+  [['basic',2],['safety',2],['daily',2],['supplement',3],['custom',1]].forEach(([c,n])=>{
+    const arr=cats[c]; for(let i=0;i<n&&arr.length;i++) picks.push(arr.shift());
+  });
+  // fill to 10
+  const rem=[...cats.basic,...cats.safety,...cats.daily,...cats.custom];
+  while(picks.length<10 && rem.length) picks.push(rem.shift());
+
+  S.todayIds=picks.slice(0,10); S.todayDone=[]; S.todayDate=today;
+  save();
+}
+
+/* ══════════════════════════════════════════════════
+   STREAK
+══════════════════════════════════════════════════ */
+function updateStreak(){
+  const today=todayKey();
+  if(S.lastStudy===today) return;
+  const yd=(()=>{const d=new Date();d.setDate(d.getDate()-1);return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;})();
+  if(S.lastStudy===yd) S.streak=(S.streak||0)+1;
+  else if(S.lastStudy!==today) S.streak=1;
+  S.lastStudy=today; save();
+}
+
+/* ══════════════════════════════════════════════════
+   GREETING
+══════════════════════════════════════════════════ */
+function greet(){
+  const h=new Date().getHours();
+  if(h<6)  return '좋은 새벽이에요 🌙';
+  if(h<10) return '좋은 아침이에요! 🌅';
+  if(h<14) return '좋은 오전이에요 ☀️';
+  if(h<18) return '좋은 오후예요 🌤️';
+  if(h<21) return '좋은 저녁이에요 🌆';
+  return '좋은 밤이에요 🌙';
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER: HOME
+══════════════════════════════════════════════════ */
+function renderHome(){
+  document.getElementById('greet-txt').textContent=greet();
+  pickToday();
+  const done=S.todayDone.length, total=S.todayIds.length||10;
+
+  // ring
+  const circ=188.5, off=circ-(circ*done/total);
+  document.getElementById('ring-fill').setAttribute('stroke-dashoffset',off);
+  document.getElementById('ring-num').textContent=done;
+  document.getElementById('ring-val').textContent=done===0?'시작해 볼까요?':done===total?'✅ 오늘 완료!':done+'문장 학습 완료';
+  document.getElementById('ring-sub').textContent=done===total?'Luar biasa! 대단해요 🎉':(total-done)+'문장 남았어요';
+  document.getElementById('top-badge').textContent=`오늘 ${done}/${total}`;
+
+  // streak
+  document.getElementById('streak-num').textContent=S.streak||0;
+  document.getElementById('streak-desc').textContent=
+    (S.streak||0)>1?`${S.streak}일 연속 학습 중! 훌륭해요 💪`:'오늘 학습을 시작해 보세요!';
+
+  // preview
+  const scroll=document.getElementById('preview-scroll');
+  scroll.innerHTML='';
+  const words=allWords();
+  S.todayIds.forEach(id=>{
+    const w=words.find(x=>x.id===id); if(!w) return;
+    const done2=S.todayDone.includes(id);
+    const clabel={basic:'기초회화',safety:'안전수칙',daily:'일상생활',supplement:'보충자료',custom:'내가 추가'}[w.cat]||'';
+    const el=document.createElement('div');
+    el.className=`prev-card c-${w.cat}`;
+    el.innerHTML=`<div class="pc-cat">${clabel}</div>
+      <div class="pc-indo">${w.indo}</div>
+      <div class="pc-read">${w.read||''}</div>
+      <div class="pc-kr">${w.kr}</div>
+      ${done2?'<div class="pc-chk">✅</div>':''}`;
+    el.onclick=()=>openModal(w);
+    scroll.appendChild(el);
+  });
+
+  // counts
+  const all=allWords();
+  ['basic','safety','daily','supplement','custom'].forEach(c=>{
+    document.getElementById('cnt-'+c).textContent=all.filter(x=>x.cat===c).length;
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER: TODAY
+══════════════════════════════════════════════════ */
+function renderToday(){
+  pickToday();
+  const d=new Date();
+  const days=['일','월','화','수','목','금','토'];
+  document.getElementById('today-date').textContent=
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+
+  const done=S.todayDone.length, total=S.todayIds.length||10;
+  document.getElementById('prog-fill').style.width=(done/total*100)+'%';
+  document.getElementById('done-banner').classList.toggle('show',done===total);
+
+  const list=document.getElementById('tl-list'); list.innerHTML='';
+  const words=allWords();
+  const icons={basic:'💼',safety:'🦺',daily:'🌴',supplement:'📖',custom:'✏️'};
+
+  S.todayIds.forEach((id,i)=>{
+    const w=words.find(x=>x.id===id); if(!w) return;
+    const isDone=S.todayDone.includes(id);
+    const sit=w.sits&&w.sits[0];
+    const el=document.createElement('div');
+    el.className='tl-item'+(isDone?' done':'');
+    el.innerHTML=`<div class="tl-num">${isDone?'✓':(i+1)}</div>
+      <div class="tl-body">
+        <div class="tl-top-row">
+          <div class="tl-indo">${w.indo}</div>
+          <button class="speak-sm" onclick="event.stopPropagation();speakIndo('${escQ(w.indo)}')">🔊</button>
+        </div>
+        <div class="tl-read">${w.read||''}</div>
+        <div class="tl-kr">${w.kr}</div>
+        ${sit?`<div class="tl-sit">${icons[w.cat]||''} ${w.sub?'['+w.sub+'] ':''}${sit.indo}</div>`:''}
+      </div>
+      <div class="tl-chk">${isDone?'✅':'⬜'}</div>`;
+    el.onclick=()=>{
+      if(!isDone){ S.todayDone.push(id); updateStreak(); save(); }
+      _curModal=w; openModal(w);
+    };
+    list.appendChild(el);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER: LESSON LIST
+══════════════════════════════════════════════════ */
+let _filter='all';
+function setFilter(f,el){
+  _filter=f;
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
+  if(el) el.classList.add('on');
+  renderLesson();
+}
+function goTabFilter(cat){
+  goTab('lesson');
+  const el=document.querySelector(`.fpill[data-f="${cat}"]`);
+  setFilter(cat,el);
+}
+
+function renderLesson(){
+  const list=document.getElementById('llist'); list.innerHTML='';
+  let words=allWords();
+  if(_filter==='bm') words=words.filter(w=>S.bookmarks.includes(w.id));
+  else if(_filter!=='all') words=words.filter(w=>w.cat===_filter);
+
+  if(!words.length){
+    list.innerHTML=`<div class="empty"><div class="eico">${_filter==='bm'?'⭐':'📭'}</div>
+      <div class="etxt">${_filter==='bm'?'즐겨찾기한 단어가 없어요.<br>모달에서 ☆를 눌러 추가해보세요!':'단어가 없어요.<br>추가 탭에서 직접 추가해 보세요!'}</div></div>`;
+    return;
+  }
+
+  const catLbl={basic:'기초회화',safety:'안전수칙',daily:'일상생활',supplement:'보충자료',custom:'내가 추가'};
+  const badgeCls={basic:'bb',safety:'bs',daily:'bd',supplement:'bsp',custom:'bc'};
+
+  words.forEach(w=>{
+    const card=document.createElement('div');
+    card.className='lcard';
+    const exHtml=(w.sits||[]).map(s=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:3px">
+          <div class="ex-tag">[${s.tag}]</div>
+          <button class="speak-sm" onclick="event.stopPropagation();speakIndo('${escQ(s.indo)}')">🔊</button>
+        </div>
+        <div class="ex-indo">${s.indo}</div>
+        ${s.read?`<div class="ex-read">${s.read}</div>`:''}
+        <div class="ex-kr">${s.kr}</div>
+      </div>`).join('<div class="ex-sep"></div>');
+
+    card.innerHTML=`
+      <div class="lcard-bar bar-${w.cat}"></div>
+      <div class="lcard-inner">
+        <div class="lcard-top">
+          <div class="lc-indo">${w.indo}</div>
+          <div class="lc-badge ${badgeCls[w.cat]}">${catLbl[w.cat]||''}${w.sub?' · '+w.sub:''}</div>
+        </div>
+        <div class="lc-speak-row">
+          <div class="lc-read">${w.read?'발음: '+w.read:''}</div>
+          <button class="speak-sm" onclick="event.stopPropagation();speakIndo('${escQ(w.indo)}')">🔊 듣기</button>
+        </div>
+        <div class="lc-kr">뜻: ${w.kr}</div>
+        <div class="lc-foot">
+          <button class="lc-exbtn" onclick="toggleEx(event,'${w.id}')">📖 예문 보기 <span>▾</span></button>
+          ${w.memo?`<span class="lc-memo">💡 ${w.memo}</span>`:''}
+        </div>
+        <div class="lc-ex" id="lex-${w.id}">${exHtml||'<span style="color:var(--txt3);font-size:12px">예문 없음</span>'}</div>
+      </div>`;
+    card.querySelector('.lcard-inner').addEventListener('click',e=>{
+      if(!e.target.closest('.lc-exbtn')) openModal(w);
+    });
+    list.appendChild(card);
+  });
+}
+
+function toggleEx(e,id){
+  e.stopPropagation();
+  const el=document.getElementById('lex-'+id);
+  const open=el.classList.toggle('open');
+  const btn=e.currentTarget;
+  btn.innerHTML=open?'📖 예문 접기 <span>▴</span>':'📖 예문 보기 <span>▾</span>';
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER: ADD + MY WORDS
+══════════════════════════════════════════════════ */
+function renderMyWords(){
+  const list=document.getElementById('mw-list');
+  const customs=S.custom;
+  document.getElementById('mw-cnt').textContent=customs.length+'개';
+  if(!customs.length){
+    list.innerHTML=`<div class="empty"><div class="eico">📝</div><div class="etxt">아직 추가한 단어가 없어요</div></div>`;
+    return;
+  }
+  list.innerHTML='';
+  [...customs].reverse().forEach((w,ri)=>{
+    const idx=customs.length-1-ri;
+    const el=document.createElement('div');
+    el.className='mw-item';
+    el.innerHTML=`<div class="mw-body"><div class="mw-indo">${w.indo}</div>
+      <div class="mw-sub">${w.kr}${w.read?' · '+w.read:''}</div></div>
+      <button class="mw-del" onclick="delCustom(event,${idx})">삭제</button>`;
+    el.onclick=(e)=>{ if(!e.target.closest('.mw-del')) openModal(w); };
+    list.appendChild(el);
+  });
+}
+
+function doAdd(){
+  const indo=document.getElementById('ai').value.trim();
+  const kr=document.getElementById('ak').value.trim();
+  if(!indo||!kr){ toast('인도네시아어와 한국어 뜻은 필수입니다!'); return; }
+
+  const read=document.getElementById('ar').value.trim();
+  const sit=document.getElementById('as').value.trim();
+  const exI=document.getElementById('aei').value.trim();
+  const exK=document.getElementById('aek').value.trim();
+  const memo=document.getElementById('am').value.trim();
+
+  S.custom.push({
+    id:'c'+Date.now(), cat:'custom',
+    indo, read, kr, memo,
+    sits:(exI||exK||sit)?[{tag:sit||'직접 추가',indo:exI||indo,read,kr:exK||kr}]:[],
+  });
+  save();
+  toast('✅ 추가됐어요!');
+  ['ai','ar','ak','as','aei','aek','am'].forEach(id=>{ document.getElementById(id).value=''; });
+  renderMyWords(); renderHome();
+}
+
+function delCustom(e,idx){
+  e.stopPropagation();
+  if(!confirm('삭제할까요?')) return;
+  S.custom.splice(idx,1); save();
+  renderMyWords(); renderHome();
+  toast('삭제됐어요');
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════ */
+let _curModal=null;
+const catInfo={
+  basic:{lbl:'📗 기초회화',col:'var(--teal)'},
+  safety:{lbl:'🦺 안전수칙',col:'var(--red)'},
+  daily:{lbl:'🌴 일상생활',col:'var(--gold)'},
+  supplement:{lbl:'📖 보충자료',col:'#a78bfa'},
+  custom:{lbl:'✏️ 내가 추가',col:'var(--blue)'},
+};
+
+function openModal(w){
+  _curModal=w;
+  const info=catInfo[w.cat]||catInfo.basic;
+  document.getElementById('sh-cat').textContent=info.lbl+(w.sub?' · '+w.sub:'');
+  document.getElementById('sh-cat').style.color=info.col;
+  document.getElementById('sh-indo').textContent=w.indo;
+  document.getElementById('sh-read').textContent=w.read?'발음: '+w.read:'';
+  document.getElementById('sh-kr').textContent='뜻: '+w.kr;
+
+  // bookmark
+  const bm=document.getElementById('sh-bm-btn');
+  const isBM=S.bookmarks.includes(w.id);
+  bm.textContent=isBM?'★':'☆'; bm.classList.toggle('on',isBM);
+
+  // situations (sit 예문 + 듣기 버튼)
+  const sits=document.getElementById('sh-sits'); sits.innerHTML='';
+  (w.sits||[]).forEach(s=>{
+    const el=document.createElement('div');
+    el.className='sit-item';
+    const indoSafe=s.indo.replace(/'/g,"\\'");
+    el.innerHTML=`<div class="sit-speak-row">
+        <div class="sit-tag">${s.tag}</div>
+        <button class="speak-sm" onclick="speakIndo('${indoSafe}',this)">🔊</button>
+      </div>
+      <div class="sit-indo">${s.indo}</div>
+      ${s.read?`<div class="sit-read">발음: ${s.read}</div>`:''}
+      <div class="sit-kr">${s.kr}</div>`;
+    sits.appendChild(el);
+  });
+  if(!(w.sits||[]).length) sits.innerHTML='<div style="font-size:12px;color:var(--txt3);padding:6px 0">예문이 없습니다</div>';
+
+  // memo
+  const mw=document.getElementById('sh-memo-wrap');
+  mw.style.display=w.memo?'block':'none';
+  if(w.memo) document.getElementById('sh-memo').textContent=w.memo;
+
+  // done button
+  const inToday=S.todayIds.includes(w.id);
+  const isDone=S.todayDone.includes(w.id);
+  const doneBtn=document.getElementById('sh-done-btn');
+  doneBtn.style.display=inToday?'block':'none';
+  if(inToday) doneBtn.textContent=isDone?'✅ 이미 완료됨':'⬜ 학습 완료 체크';
+
+  // TTS 메인 버튼 설정
+  const mainBtn=document.getElementById('sh-speak-main');
+  if(mainBtn){
+    mainBtn.textContent='🔊 듣기';
+    mainBtn.classList.remove('speaking');
+    mainBtn.onclick=()=>speakIndo(w.indo, mainBtn);
+  }
+  // TTS 속도 슬라이더 표시
+  const ctrl=document.getElementById('tts-control');
+  if(ctrl) ctrl.style.display=TTS.supported?'flex':'none';
+
+  // 기존 TTS 정지
+  if(TTS.synth&&TTS.synth.speaking){ TTS.synth.cancel(); ttsResetAllBtns(); }
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function markDoneFromModal(){
+  if(!_curModal) return;
+  const id=_curModal.id;
+  if(!S.todayIds.includes(id)) return;
+  if(!S.todayDone.includes(id)){
+    S.todayDone.push(id); updateStreak(); save();
+    document.getElementById('sh-done-btn').textContent='✅ 이미 완료됨';
+    toast('✅ 학습 완료!');
+    renderHome(); renderToday();
+  }
+}
+
+function toggleBM(){
+  if(!_curModal) return;
+  const id=_curModal.id;
+  const idx=S.bookmarks.indexOf(id);
+  if(idx===-1){ S.bookmarks.push(id); toast('⭐ 즐겨찾기 추가!'); }
+  else{ S.bookmarks.splice(idx,1); toast('즐겨찾기 해제'); }
+  save();
+  const bm=document.getElementById('sh-bm-btn');
+  const isBM=S.bookmarks.includes(id);
+  bm.textContent=isBM?'★':'☆'; bm.classList.toggle('on',isBM);
+}
+
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+function onOverlayClick(e){ if(e.target===document.getElementById('overlay')) closeOverlay(); }
+
+/* ══════════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════════ */
+let _searchOpen=false;
+function toggleSearch(){
+  _searchOpen=!_searchOpen;
+  document.getElementById('search-bar').classList.toggle('show',_searchOpen);
+  if(_searchOpen) document.getElementById('search-input').focus();
+  else{ clearSearch(); }
+}
+function clearSearch(){
+  document.getElementById('search-input').value='';
+  if(_searchOpen){ toggleSearch(); }
+  // restore current tab
+  renderLesson();
+}
+function onSearch(q){
+  if(!q.trim()){ renderLesson(); return; }
+  q=q.toLowerCase();
+  const results=allWords().filter(w=>
+    w.indo.toLowerCase().includes(q)||
+    w.kr.includes(q)||
+    (w.read&&w.read.includes(q))
+  );
+  // render results in lesson list
+  goTab('lesson',false);
+  const list=document.getElementById('llist'); list.innerHTML='';
+  if(!results.length){
+    list.innerHTML=`<div class="empty"><div class="eico">🔍</div><div class="etxt">"${q}" 검색 결과가 없어요</div></div>`;
+    return;
+  }
+  const catLbl={basic:'기초회화',safety:'안전수칙',daily:'일상생활',supplement:'보충자료',custom:'내가 추가'};
+  const badgeCls={basic:'bb',safety:'bs',daily:'bd',supplement:'bsp',custom:'bc'};
+  results.forEach(w=>{
+    const card=document.createElement('div');
+    card.className='lcard';
+    card.innerHTML=`<div class="lcard-bar bar-${w.cat}"></div>
+      <div class="lcard-inner">
+        <div class="lcard-top">
+          <div class="lc-indo">${w.indo}</div>
+          <div class="lc-badge ${badgeCls[w.cat]}">${catLbl[w.cat]||''}${w.sub?' · '+w.sub:''}</div>
+        </div>
+        <div class="lc-read">${w.read?'발음: '+w.read:''}</div>
+        <div class="lc-kr">뜻: ${w.kr}</div>
+      </div>`;
+    card.onclick=()=>openModal(w);
+    list.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   TAB NAVIGATION
+══════════════════════════════════════════════════ */
+const TABS=['home','today','lesson','add'];
+function goTab(tab, doRender=true){
+  TABS.forEach(t=>{
+    document.getElementById('sc-'+t).classList.toggle('active',t===tab);
+    document.getElementById('nb-'+t).classList.toggle('active',t===tab);
+  });
+  if(!doRender) return;
+  if(tab==='home')   renderHome();
+  if(tab==='today')  renderToday();
+  if(tab==='lesson') renderLesson();
+  if(tab==='add')    renderMyWords();
+}
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+/* ══════════════════════════════════════════════════
+   PWA INSTALL
+══════════════════════════════════════════════════ */
+let _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); _deferredPrompt=e;
+  if(!localStorage.getItem('install_dismissed')){
+    document.getElementById('install-banner').classList.add('show');
+  }
+});
+document.getElementById('ib-install-btn').onclick=async()=>{
+  if(!_deferredPrompt) return;
+  _deferredPrompt.prompt();
+  const r=await _deferredPrompt.userChoice;
+  _deferredPrompt=null;
+  document.getElementById('install-banner').classList.remove('show');
+};
+function dismissInstall(){
+  localStorage.setItem('install_dismissed','1');
+  document.getElementById('install-banner').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════════════
+   SERVICE WORKER
+══════════════════════════════════════════════════ */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+load();
+pickToday();
+renderHome();
+
+/* ══════════════════════════════════════════════════
+   TTS — 인도네시아어 발음 듣기 (Web Speech API)
+══════════════════════════════════════════════════ */
+const TTS = {
+  synth: window.speechSynthesis || null,
+  speed: 0.9,
+  supported: !!window.speechSynthesis,
+  voices: [],
+  indoVoice: null,
+  _speaking: false,
+  _loadTried: false,
+};
+
+/* 인도네시아어 목소리 로드 */
+function ttsLoadVoices() {
+  if (!TTS.synth) return;
+  TTS.voices = TTS.synth.getVoices();
+  // id (인도네시아) 우선, 없으면 ms-ID, 없으면 첫번째 목소리
+  TTS.indoVoice =
+    TTS.voices.find(v => v.lang === 'id-ID') ||
+    TTS.voices.find(v => v.lang && v.lang.startsWith('id')) ||
+    TTS.voices.find(v => v.lang === 'ms-MY') ||  // 말레이어 유사
+    null;
+}
+
+if (TTS.synth) {
+  ttsLoadVoices();
+  if (TTS.voices.length === 0) {
+    TTS.synth.addEventListener('voiceschanged', ttsLoadVoices);
+  }
+}
+
+/* 텍스트 읽기 핵심 함수 */
+function speakIndo(text, btnEl) {
+  if (!TTS.supported) { toast('⚠️ 이 브라우저는 TTS를 지원하지 않아요'); return; }
+  if (!text || !text.trim()) return;
+
+  // 현재 재생 중이면 정지
+  if (TTS.synth.speaking) {
+    TTS.synth.cancel();
+    ttsResetAllBtns();
+    if (TTS._lastText === text) { TTS._lastText = ''; return; }
+  }
+
+  TTS._lastText = text;
+
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang  = 'id-ID';
+  utt.rate  = TTS.speed;
+  utt.pitch = 1.0;
+  utt.volume= 1.0;
+  if (TTS.indoVoice) utt.voice = TTS.indoVoice;
+
+  // 버튼 상태 표시
+  const btn = btnEl || ttsGetActiveSpeakBtn();
+  if (btn) { btn.classList.add('speaking'); btn.textContent = '⏹ 정지'; }
+
+  utt.onend = () => {
+    TTS._lastText = '';
+    ttsResetAllBtns();
+  };
+  utt.onerror = () => {
+    TTS._lastText = '';
+    ttsResetAllBtns();
+  };
+
+  TTS.synth.speak(utt);
+}
+
+/* 모달 메인 버튼 — 현재 표시된 단어 읽기 */
+function speakText(text, fromMainBtn) {
+  const indo = document.getElementById('sh-indo')?.textContent || '';
+  speakIndo(indo, fromMainBtn ? document.getElementById('sh-speak-main') : null);
+}
+
+/* 속도 업데이트 */
+function updateSpeed(val) {
+  TTS.speed = parseFloat(val);
+  document.getElementById('tts-speed-val').textContent = val + 'x';
+  if (TTS.synth?.speaking) TTS.synth.cancel();
+}
+
+/* 버튼 초기화 */
+function ttsResetAllBtns() {
+  document.querySelectorAll('.speak-btn.speaking,.speak-sm.speaking').forEach(b => {
+    b.classList.remove('speaking');
+    // 아이콘 복구
+    if (b.classList.contains('speak-btn')) b.textContent = '🔊 듣기';
+    else b.textContent = b.dataset.full ? '🔊 듣기' : '🔊';
+  });
+  const main = document.getElementById('sh-speak-main');
+  if (main) main.textContent = '🔊 듣기';
+}
+
+function ttsGetActiveSpeakBtn() {
+  return document.querySelector('.speak-btn:not(#sh-speak-main)') || null;
+}
+
+/* escQ — JS 문자열 안전 이스케이프 (onclick 안에 들어가는 텍스트용) */
+function escQ(str) {
+  if (!str) return '';
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\'").replace(/"/g, '&quot;');
+}
+
+
+/* 오버레이 닫을 때 TTS 정지 */
+const _origCloseOverlay = closeOverlay;
+function closeOverlay() {
+  if (TTS.synth?.speaking) { TTS.synth.cancel(); ttsResetAllBtns(); }
+  _origCloseOverlay();
+}
+
+</script>
+</body>
+</html>
